@@ -10,6 +10,11 @@ class Singleton {
         desc = "Solo";
     }
 
+    @Override
+    public String toString() {
+        return desc;
+    }
+
     public static Singleton getInstance() {
         if (singleInstance == null)
             singleInstance = new Singleton();
