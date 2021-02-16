@@ -24,6 +24,12 @@
          - Places a notification that order for token is ready
 */
 
+//Should have created a package and put in different classes but for simplicity all the classes are added here.
+
+
+import java.util.ArrayList;
+import java.util.List;
+
 class Customer {
     Cashier cashier;
 
@@ -40,7 +46,6 @@ class Customer {
 }
 
 class Cashier {
-    Customer customer;
 
     public Order createOrder() {
         return new Order();
@@ -50,7 +55,8 @@ class Cashier {
 
     }
 
-    public void issueToken(Customer customer) {
+    public Order issueToken(Customer customer) {
+    	return customer.getToken();
 
     }
 }
@@ -60,6 +66,10 @@ class Barista {
     }
 
     public void prepareCoffee() {
+
+    }
+
+    public void addOrderToCompletedQueue(Order order) {
 
     }
 
@@ -74,5 +84,7 @@ class Order {
 
 
 public class Q10 {
+    List<Order> orderedQueue = new ArrayList<>();
+    List<Order> completedOrder = new ArrayList<>();
 
 }
