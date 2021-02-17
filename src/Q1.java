@@ -17,10 +17,9 @@ public class Q1 {
 
         var iter = list.listIterator();
 
-        while(iter.hasNext()) {
+        while (iter.hasNext()) {
             sum += iter.next();
         }
-        System.out.println(sum);
-
+        System.out.println("Sum: " + sum);
     }
 }
