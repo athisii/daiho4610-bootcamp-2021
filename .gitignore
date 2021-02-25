@@ -1,2 +1,4 @@
 .idea
 Java-Bootcamp.iml
+out
+my-maven-project/**/target
