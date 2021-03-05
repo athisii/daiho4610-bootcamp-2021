@@ -1,1 +1,2 @@
-Exercises for Java Bootcamp 2021
+Exercises for Java Bootcamp 2021 \
+Session: RestFul Web Service Part 1
