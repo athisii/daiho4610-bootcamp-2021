@@ -1,1 +1,2 @@
-Exercises for Java Bootcamp 2021
+JVM Bootcamp 2021 \
+Online Shopping System
