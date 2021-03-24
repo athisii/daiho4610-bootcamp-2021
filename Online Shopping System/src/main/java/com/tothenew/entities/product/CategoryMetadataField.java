@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -16,8 +18,8 @@ public class CategoryMetadataField {
     private int id;
     private String name;
 
-//    @OneToOne(mappedBy = "categoryMetadataField")
-//    private CategoryMetadataFieldValues categoryMetadataFieldValues;
+    @OneToMany(mappedBy = "categoryMetadataField", cascade = CascadeType.ALL)
+    private List<CategoryMetadataFieldValues> categoryMetadataFieldValues = new ArrayList<>();
 
 
 }

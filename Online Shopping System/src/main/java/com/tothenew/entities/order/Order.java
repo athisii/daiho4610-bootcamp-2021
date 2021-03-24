@@ -1,19 +1,20 @@
 package com.tothenew.entities.order;
 
-import com.tothenew.entities.user.Address;
 import com.tothenew.entities.user.Customer;
-import com.tothenew.entities.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "`order`")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,8 +27,7 @@ public class Order {
     @JoinColumn(name = "customer_user_id")
     private Customer customer;
 
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
-    private OrderProduct orderProduct;
-
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderProduct> orderProduct = new ArrayList<>();
 
 }

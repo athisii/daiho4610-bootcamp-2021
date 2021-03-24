@@ -9,6 +9,9 @@ public class OnlineShoppingSystem {
 
     public static void main(String[] args) {
         SpringApplication.run(OnlineShoppingSystem.class, args);
+
+
+
     }
 
 }

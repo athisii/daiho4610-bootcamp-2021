@@ -12,19 +12,20 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductReview {
+    @EmbeddedId
+    private ProductReviewKey productReviewKey = new ProductReviewKey();
+    @ManyToOne
+    @MapsId("customerId")
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
-    @Id
-    private int id;
-    private String review;
-    private int rating;
-
-    @OneToOne
-    @MapsId
+    @ManyToOne
+    @MapsId("productId")
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @OneToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    private String review;
+    private int rating;
+
 
 }

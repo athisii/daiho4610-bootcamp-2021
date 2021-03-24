@@ -1,6 +1,7 @@
 package com.tothenew.entities.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 
 @JsonIgnoreProperties(value = {"users"})
 @Entity
+@Data
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,31 +20,4 @@ public class Role {
     @ManyToMany(mappedBy = "roles", cascade = CascadeType.ALL)
     List<User> users = new ArrayList<>();
 
-
-    public int getId() {
-        return id;
-    }
-
-    public Role setId(int id) {
-        this.id = id;
-        return this;
-    }
-
-    public String getAuthority() {
-        return authority;
-    }
-
-    public Role setAuthority(String authority) {
-        this.authority = authority;
-        return this;
-    }
-
-    public List<User> getUsers() {
-        return users;
-    }
-
-    public Role setUsers(List<User> users) {
-        this.users = users;
-        return this;
-    }
 }

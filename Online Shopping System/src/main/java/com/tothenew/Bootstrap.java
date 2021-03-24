@@ -29,28 +29,26 @@ public class Bootstrap implements ApplicationRunner {
             Role role_seller = new Role();
             role_seller.setAuthority("ROLE_SELLER");
             Role role_customer = new Role();
-            role_customer.setAuthority("ROLE_CUSTOMER");
 
 
             User admin = new Admin();
             admin.setEmail("admin@ttn.com");
             admin.setPassword(passwordEncoder.encode("password"));
             admin.getRoles().add(role_admin);
-            role_admin.getUsers().add(admin);
+
 
 
             User seller = new Seller();
             seller.setEmail("seller@ttn.com");
             seller.setPassword(passwordEncoder.encode("password"));
             seller.getRoles().add(role_seller);
-            role_seller.getUsers().add(seller);
 
 
             User customer = new Customer();
             customer.setEmail("customer@ttn.com");
             customer.setPassword(passwordEncoder.encode("password"));
             customer.getRoles().add(role_customer);
-            role_customer.getUsers().add(customer);
+
 
 
             Address address1 = new Address();

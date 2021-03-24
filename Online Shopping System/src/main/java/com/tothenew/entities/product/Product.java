@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Data
@@ -31,10 +32,10 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
-    private ProductVariation productVariation;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductVariation> productVariations;
 
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
-    private ProductReview productReview;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductReview> productReview;
 
 }
