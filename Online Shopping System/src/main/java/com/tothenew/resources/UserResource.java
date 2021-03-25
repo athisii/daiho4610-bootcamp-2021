@@ -28,7 +28,7 @@ public class UserResource {
     public List<User> retrieveAllUsers() {
         return userRepository.findAll();
     }
-
+    
 
     @GetMapping("/admin/home")
     public String adminHome() {

@@ -17,6 +17,8 @@ import javax.transaction.Transactional;
 @Service
 public class SellerService {
     @Autowired
+    private UserService userService;
+    @Autowired
     private UserRepository userRepository;
     @Autowired
     private SellerRepository sellerRepository;
@@ -25,7 +27,7 @@ public class SellerService {
     private PasswordEncoder passwordEncoder;
 
     @Transactional
-    public Seller registerNewSeller(SellerDto sellerDto)
+    public void registerNewSeller(SellerDto sellerDto)
             throws UserAlreadyExistException {
 
         if (emailExists(sellerDto.getEmail())) {
@@ -37,7 +39,9 @@ public class SellerService {
         mm.map(sellerDto, newSeller);
         newSeller.setPassword(passwordEncoder.encode(newSeller.getPassword()));
         newSeller.getRoles().add(new Role("ROLE_SELLER"));
-        return sellerRepository.save(newSeller);
+        sellerRepository.save(newSeller);
+        userService.sendActivationStatus(newSeller, "SELLER");
+
 
     }
 

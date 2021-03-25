@@ -1,6 +1,7 @@
 package com.tothenew;
 
 import com.tothenew.entities.user.*;
+import com.tothenew.repos.RoleRepository;
 import com.tothenew.repos.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -10,12 +11,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Component
 public class Bootstrap implements ApplicationRunner {
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Transactional
     @Override
@@ -26,9 +31,13 @@ public class Bootstrap implements ApplicationRunner {
 
             Role role_admin = new Role();
             role_admin.setAuthority("ROLE_ADMIN");
-//            Role role_seller = new Role();
-//            role_seller.setAuthority("ROLE_SELLER");
-//            Role role_customer = new Role();
+
+            Role role_seller = new Role();
+            role_seller.setAuthority("ROLE_SELLER");
+
+            Role role_customer = new Role();
+            role_customer.setAuthority("ROLE_CUSTOMER");
+            roleRepository.saveAll(List.of(role_admin, role_seller, role_customer));
 
             User admin = new User();
             admin.setEmail("admin@tothenew.com");
