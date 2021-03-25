@@ -56,7 +56,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .antMatchers("/", "/h2-console/**").permitAll()
 //                .antMatchers("/seller/").hasAnyRole("SELLER")
 //                .antMatchers("/customer/").hasAnyRole("CUSTOMER")
-                .antMatchers("/doLogout").hasAnyRole("ADMIN", "SELLER", "CUSTOMER")
+//                .antMatchers("/doLogout").hasAnyRole("ADMIN", "SELLER", "CUSTOMER")
 //                .anyRequest().authenticated()
                 .and()
                 .sessionManagement()

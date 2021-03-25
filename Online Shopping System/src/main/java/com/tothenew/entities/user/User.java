@@ -3,8 +3,13 @@ package com.tothenew.entities.user;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.boot.cloud.CloudFoundryVcapEnvironmentPostProcessor;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -13,7 +18,7 @@ import java.util.Set;
 @Entity
 @Data
 @EqualsAndHashCode(exclude = {"roles", "addresses"})
-@JsonIgnoreProperties(value = {"password", "addresses"})
+//@JsonIgnoreProperties(value = {"password", "addresses", "roles"})
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User {
 
@@ -37,7 +42,6 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Address> addresses = new ArrayList<>();
-
 
     @Override
     public String toString() {
