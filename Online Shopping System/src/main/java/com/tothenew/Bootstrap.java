@@ -39,7 +39,7 @@ public class Bootstrap implements ApplicationRunner {
             role_customer.setAuthority("ROLE_CUSTOMER");
             roleRepository.saveAll(List.of(role_admin, role_seller, role_customer));
 
-            User admin = new User();
+            User admin = new Admin();
             admin.setEmail("admin@tothenew.com");
             admin.setPassword(passwordEncoder.encode("password"));
             admin.setFirstName("admin");

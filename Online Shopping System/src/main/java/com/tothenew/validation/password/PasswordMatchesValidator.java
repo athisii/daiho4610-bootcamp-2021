@@ -1,7 +1,7 @@
-package com.tothenew.validation;
+package com.tothenew.validation.password;
 
-import com.tothenew.objects.CustomerDto;
 import com.tothenew.objects.UserDto;
+import com.tothenew.validation.password.PasswordMatches;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

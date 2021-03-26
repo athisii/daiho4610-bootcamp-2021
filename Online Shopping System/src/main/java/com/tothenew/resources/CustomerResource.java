@@ -1,6 +1,8 @@
 package com.tothenew.resources;
 
 import com.tothenew.objects.CustomerDto;
+import com.tothenew.objects.EmailDto;
+import com.tothenew.objects.ResetPasswordDto;
 import com.tothenew.services.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,7 +29,26 @@ public class CustomerResource {
     @PutMapping("/confirm-account")
     public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token) {
         customerService.confirmRegisteredCustomer(token);
-        return new ResponseEntity<>("Your account verified successfully!", HttpStatus.OK);
+        return new ResponseEntity<>("Your account has been verified successfully!", HttpStatus.OK);
     }
+
+    @PostMapping("/resend-token")
+    public ResponseEntity<?> resendRegistrationToken(@Valid @RequestBody EmailDto emailDto) {
+        customerService.resendToken(emailDto);
+        return new ResponseEntity<>("Activation link has been resent.", HttpStatus.OK);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody EmailDto emailDto) {
+        customerService.resendToken(emailDto);
+        return new ResponseEntity<>("Link to reset the password has been sent.", HttpStatus.OK);
+    }
+
+    @PostMapping("/confirm-reset-password/{token}")
+    public ResponseEntity<?> confirmResetPassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto, @PathVariable String token) {
+        customerService.resetPassword(resetPasswordDto, token);
+        return new ResponseEntity<>("Password reset successfully!", HttpStatus.OK);
+    }
+
 
 }

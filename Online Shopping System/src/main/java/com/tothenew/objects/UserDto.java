@@ -1,8 +1,10 @@
 package com.tothenew.objects;
 
-import com.tothenew.validation.PasswordMatches;
-import com.tothenew.validation.ValidEmail;
-import com.tothenew.validation.ValidPassword;
+import com.tothenew.validation.password.PasswordMatches;
+import com.tothenew.validation.password.ValidPassword;
+import com.tothenew.validation.email.EmailValidator;
+import com.tothenew.validation.phonenumber.Phone;
+import com.tothenew.validation.phonenumber.PhoneNumber;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +14,6 @@ import javax.validation.constraints.Size;
 
 @Getter
 @Setter
-
 @PasswordMatches
 public class UserDto {
     @NotNull
@@ -32,9 +33,12 @@ public class UserDto {
     @Size(min = 1)
     private String matchingPassword;
 
-    @ValidEmail
+    @EmailValidator.ValidEmail
     @NotNull
     @Size(min = 1, message = "Email should be well-formed")
     private String email;
+
+//    @Phone
+//    private PhoneNumber phone;
 
 }

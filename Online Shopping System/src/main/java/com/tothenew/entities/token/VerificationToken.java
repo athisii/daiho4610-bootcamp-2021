@@ -11,19 +11,17 @@ import java.util.Date;
 @Entity
 @Data
 public class VerificationToken {
-    private static final int EXPIRATION = 60 * 24;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
     private String token;
 
 
     public VerificationToken(String token, User user) {
         this.token = token;
         this.user = user;
-        this.expiryDate = calculateExpiryDate(20);
+        this.expiryDate = calculateExpiryDate(15);
 
     }
 
@@ -34,7 +32,6 @@ public class VerificationToken {
     private Date expiryDate;
 
     public VerificationToken() {
-
     }
 
     private Date calculateExpiryDate(int expiryTimeInMinutes) {

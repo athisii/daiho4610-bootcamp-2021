@@ -1,4 +1,4 @@
-package com.tothenew.validation;
+package com.tothenew.validation.password;
 
 import java.util.Arrays;
 

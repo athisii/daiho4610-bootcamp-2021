@@ -1,4 +1,4 @@
-package com.tothenew.validation;
+package com.tothenew.validation.password;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
