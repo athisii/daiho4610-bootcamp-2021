@@ -40,13 +40,13 @@ public class CustomerResource {
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody EmailDto emailDto) {
-        customerService.resendToken(emailDto);
+        customerService.resetPassword(emailDto);
         return new ResponseEntity<>("Link to reset the password has been sent.", HttpStatus.OK);
     }
 
-    @PostMapping("/confirm-reset-password/{token}")
-    public ResponseEntity<?> confirmResetPassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto, @PathVariable String token) {
-        customerService.resetPassword(resetPasswordDto, token);
+    @PutMapping("/confirm-reset-password")
+    public ResponseEntity<?> confirmResetPassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto, @RequestParam("token") String token) {
+        customerService.confirmResetPassword(resetPasswordDto, token);
         return new ResponseEntity<>("Password reset successfully!", HttpStatus.OK);
     }
 

@@ -7,6 +7,7 @@ import com.tothenew.entities.user.User;
 import com.tothenew.entities.user.UserRole;
 import com.tothenew.exception.EmailExistsException;
 import com.tothenew.exception.InvalidTokenException;
+import com.tothenew.exception.UserActivationException;
 import com.tothenew.exception.UserNotFoundException;
 import com.tothenew.objects.CustomerDto;
 import com.tothenew.objects.EmailDto;
@@ -20,7 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
 
 @Service
 @Transactional
@@ -56,10 +56,17 @@ public class CustomerService {
 
     public void confirmRegisteredCustomer(String token) throws InvalidTokenException {
         //If token got expired, new token will be generated and resend to the user.
-        String result = userService.validateVerificationTokenAndSaveUser(token);
+        String result = userService.validateVerificationToken(token);
         if (result.equals("invalidToken")) {
             throw new InvalidTokenException("Invalid Token");
         }
+        User user = userService.getUser(token);
+        user.setActive(true);
+        userRepository.save(user);
+        userService.sendActivatedMessage(user.getEmail());
+        VerificationToken oldToken = verificationTokenRepository.findByToken(token);
+        verificationTokenRepository.delete(oldToken);
+
     }
 
     public void resendToken(EmailDto emailDto) throws UserNotFoundException {
@@ -67,24 +74,31 @@ public class CustomerService {
         if (user == null) {
             throw new UserNotFoundException("No such email found!");
         }
-        if (user.isActive()) {
-            userService.sendResetPasswordMessage(user);
-        } else {
-            VerificationToken oldToken = verificationTokenRepository.findTokenByUserId(user.getId());
-            verificationTokenRepository.delete(oldToken);
-            userService.sendActivationMessage(user, UserRole.CUSTOMER);
-
-        }
+        VerificationToken oldToken = verificationTokenRepository.findTokenByUserId(user.getId());
+        verificationTokenRepository.delete(oldToken);
+        userService.sendActivationMessage(user, UserRole.CUSTOMER);
 
     }
+
 
     private boolean emailExists(String email) {
         return userRepository.findByEmail(email) != null;
     }
 
-    public void resetPassword(ResetPasswordDto resetPasswordDto, String token) {
+    public void confirmResetPassword(ResetPasswordDto resetPasswordDto, String token) {
         userService.resetPassword(resetPasswordDto, token);
 
+    }
+
+    public void resetPassword(EmailDto emailDto) {
+        User user = userRepository.findByEmail(emailDto.getEmail());
+        if (user == null) {
+            throw new UserNotFoundException("No such email found!");
+        }
+        if (!user.isActive()) {
+            throw new UserActivationException("User not activated");
+        }
+        userService.sendResetPasswordMessage(user);
     }
 }
 

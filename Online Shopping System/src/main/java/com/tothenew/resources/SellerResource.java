@@ -30,7 +30,7 @@ public class SellerResource {
         return new ResponseEntity<>("Link to reset the password has been sent.", HttpStatus.OK);
     }
 
-    @PostMapping("/confirm-reset-password/{token}")
+    @PutMapping("/confirm-reset-password/{token}")
     public ResponseEntity<?> confirmResetPassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto, @PathVariable String token) {
         sellerService.resetPassword(resetPasswordDto, token);
         return new ResponseEntity<>("Password reset successfully!", HttpStatus.OK);

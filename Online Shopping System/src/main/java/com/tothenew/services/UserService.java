@@ -39,7 +39,7 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private VerificationTokenRepository tokenRepository;
+    private VerificationTokenRepository verificationTokenRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -57,7 +57,7 @@ public class UserService {
     public String createVerificationToken(final User user) {
         final String token = UUID.randomUUID().toString();
         final VerificationToken myToken = new VerificationToken(token, user);
-        tokenRepository.save(myToken);
+        verificationTokenRepository.save(myToken);
         return myToken.getToken();
     }
 
@@ -83,15 +83,15 @@ public class UserService {
 
         mailMessage.setTo(registeredUser.getEmail());
         mailMessage.setFrom(adminEmailId);
-        mailMessage.setSubject("Reset Your Password!");
+        mailMessage.setSubject("Please reset your password");
         mailMessage.setText("To reset your password, please click here : "
-                + "http://localhost:8080/customer/confirm-account?token=" + createVerificationToken(registeredUser));
+                + "http://localhost:8080/customer/confirm-reset-password?token=" + createVerificationToken(registeredUser));
         emailService.sendEmail(mailMessage);
     }
 
 
-    public String validateVerificationTokenAndSaveUser(String token) {
-        final VerificationToken verificationToken = tokenRepository.findByToken(token);
+    public String validateVerificationToken(String token) {
+        final VerificationToken verificationToken = verificationTokenRepository.findByToken(token);
         if (verificationToken == null) {
             return TOKEN_INVALID;
         }
@@ -101,22 +101,15 @@ public class UserService {
         if ((verificationToken.getExpiryDate()
                 .getTime() - cal.getTime()
                 .getTime()) <= 0) {
-            tokenRepository.delete(verificationToken);
+            verificationTokenRepository.delete(verificationToken);
             this.sendActivationMessage(user, UserRole.CUSTOMER);
             throw new InvalidTokenException("Token expired. New activation link sent to the registered email id.");
-        }
-        //only for registration confirmation.
-        if (!user.isActive()) {
-            user.setActive(true);
-            tokenRepository.delete(verificationToken);
-            userRepository.save(user);
-            sendActivatedMessage(user.getEmail());
         }
         return TOKEN_VALID;
     }
 
     public User getUser(final String verificationToken) {
-        final VerificationToken token = tokenRepository.findByToken(verificationToken);
+        final VerificationToken token = verificationTokenRepository.findByToken(verificationToken);
         if (token != null) {
             return token.getUser();
         }
@@ -177,16 +170,27 @@ public class UserService {
             userRepository.save(user);
             sendDeactivatedMessage(user.getEmail());
         });
-
     }
 
     public void resetPassword(ResetPasswordDto resetPasswordDto, String token) {
-        String result = validateVerificationTokenAndSaveUser(token);
+        String result = validateVerificationToken(token);
         if (result.equals("invalidToken")) {
             throw new InvalidTokenException("Invalid Token");
         }
         User user = getUser(token);
         user.setPassword(passwordEncoder.encode(resetPasswordDto.getPassword()));
         userRepository.save(user);
+        sendResetSuccessMessage(user.getEmail());
+        VerificationToken oldToken = verificationTokenRepository.findByToken(token);
+        verificationTokenRepository.delete(oldToken);
+    }
+
+    public void sendResetSuccessMessage(String userEmail) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(userEmail);
+        mailMessage.setFrom(adminEmailId);
+        mailMessage.setSubject("Password Reset Successfully");
+        mailMessage.setText("Your password has been reset successfully!");
+        emailService.sendEmail(mailMessage);
     }
 }

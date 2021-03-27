@@ -1,6 +1,6 @@
 package com.tothenew.objects;
 
-import com.tothenew.validation.password.PasswordMatches;
+import com.tothenew.validation.password.ResetPasswordMatches;
 import com.tothenew.validation.password.ValidPassword;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +10,7 @@ import javax.validation.constraints.Size;
 
 @Getter
 @Setter
-@PasswordMatches
+@ResetPasswordMatches
 public class ResetPasswordDto {
     @ValidPassword
     private String password;
