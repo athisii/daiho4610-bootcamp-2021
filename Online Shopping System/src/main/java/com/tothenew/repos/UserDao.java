@@ -1,14 +1,15 @@
 package com.tothenew.repos;
 
-import com.tothenew.security.GrantAuthorityImpl;
 import com.tothenew.entities.user.AppUser;
 import com.tothenew.entities.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Repository
 public class UserDao {
@@ -18,15 +19,14 @@ public class UserDao {
 
 
     @Transactional
-    public AppUser loadUserByUsername(String email) {
+    public AppUser loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email);
-        System.out.println("Hello World");
-        if (email != null) {
-            List<GrantAuthorityImpl> grantAuthorityList = new ArrayList<>();
-            user.getRoles().forEach(role -> grantAuthorityList.add(new GrantAuthorityImpl(role.getAuthority())));
-            return new AppUser(user.getEmail(), user.getPassword(), grantAuthorityList);
+        if (user != null) {
+            Set<SimpleGrantedAuthority> grantAuthorityList = new HashSet<>();
+            user.getRoles().forEach(role -> grantAuthorityList.add(new SimpleGrantedAuthority(role.getAuthority())));
+            return new AppUser(user.getEmail(), user.getPassword(), user.isActive(), grantAuthorityList);
         } else {
-            throw new RuntimeException();
+            throw new UsernameNotFoundException("No such user found");
         }
 
     }

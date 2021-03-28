@@ -15,7 +15,7 @@ import java.util.List;
 public class CategoryMetadataField {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
     private String name;
 
     @OneToMany(mappedBy = "categoryMetadataField", cascade = CascadeType.ALL)

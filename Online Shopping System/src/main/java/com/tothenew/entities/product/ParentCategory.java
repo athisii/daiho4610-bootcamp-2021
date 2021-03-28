@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 public class ParentCategory {
     @Id
-    private int id;
+    private Long id;
     private String name;
 
     @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL)

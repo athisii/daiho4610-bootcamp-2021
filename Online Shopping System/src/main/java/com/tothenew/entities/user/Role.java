@@ -16,7 +16,7 @@ import java.util.List;
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
     private String authority;
 
     @ManyToMany(mappedBy = "roles", cascade = CascadeType.ALL)

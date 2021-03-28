@@ -14,7 +14,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 public class OrderStatus {
     @Id
-    private int id;
+    private Long id;
     private FromStatus fromStatus;
     private ToStatus toStatus;
     private String transitionNotesComments;

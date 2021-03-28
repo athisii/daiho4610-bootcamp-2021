@@ -19,7 +19,7 @@ import java.util.List;
 public class ProductVariation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
     private int quantityAvailable;
     private int price;
     private String primaryImageName;

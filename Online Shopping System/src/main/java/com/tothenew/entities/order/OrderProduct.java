@@ -14,7 +14,7 @@ import javax.persistence.*;
 public class OrderProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     private String productVariationMetadata;
     private int quantity;

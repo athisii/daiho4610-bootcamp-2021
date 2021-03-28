@@ -12,16 +12,10 @@ import org.springframework.stereotype.Service;
 public class AppUserDetailsService implements UserDetailsService {
 
     @Autowired
-    PasswordEncoder passwordEncoder;
-
-    @Autowired
     UserDao userDao;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        String encryptedPassword = passwordEncoder.encode("pass");
-        System.out.println("Trying to authenticate user ::" + email);
-        System.out.println("Encrypted Password ::"+encryptedPassword);
         return userDao.loadUserByUsername(email);
     }
 }

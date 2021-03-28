@@ -12,6 +12,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomerProductVariationKey implements Serializable {
-    private int customerId;
-    private int productVariationId;
+    private Long customerId;
+    private Long productVariationId;
 }

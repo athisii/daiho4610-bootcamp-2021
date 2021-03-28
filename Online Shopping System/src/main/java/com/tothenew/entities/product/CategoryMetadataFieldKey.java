@@ -10,7 +10,7 @@ import java.io.Serializable;
 @Embeddable
 @Data
 public class CategoryMetadataFieldKey implements Serializable {
-    private int categoryMetadataFieldId;
-    private int categoryId;
+    private Long categoryMetadataFieldId;
+    private Long categoryId;
 
 }

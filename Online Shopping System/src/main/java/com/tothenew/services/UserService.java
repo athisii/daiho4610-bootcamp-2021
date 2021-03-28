@@ -12,6 +12,7 @@ import com.tothenew.repos.VerificationTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,7 @@ public class UserService {
     @Autowired
     private EmailService emailService;
 
+
     @Autowired
     private UserRepository userRepository;
 
@@ -49,6 +51,14 @@ public class UserService {
     public static final String TOKEN_VALID = "valid";
 
 
+    public void findUserByEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            System.out.println(user);
+        }
+    }
+
+
     public Role getRole(UserRole userRole) {
         return roleRepository.findByAuthority("ROLE_" + userRole.name());
     }
@@ -59,34 +69,6 @@ public class UserService {
         final VerificationToken myToken = new VerificationToken(token, user);
         verificationTokenRepository.save(myToken);
         return myToken.getToken();
-    }
-
-    public void sendActivationMessage(User registeredUser, UserRole userRole) {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-
-        mailMessage.setTo(registeredUser.getEmail());
-        mailMessage.setFrom(adminEmailId);
-        if (UserRole.CUSTOMER == userRole) {
-            mailMessage.setSubject("Complete Your Registration!");
-            mailMessage.setText("To confirm your account, please click here : "
-                    + "http://localhost:8080/customer/confirm-account?token=" + createVerificationToken(registeredUser));
-        } else {
-            mailMessage.setSubject("Waiting for approval!");
-            mailMessage.setText("Your account has been created successfully, waiting for approval!");
-        }
-        emailService.sendEmail(mailMessage);
-    }
-
-
-    public void sendResetPasswordMessage(User registeredUser) {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-
-        mailMessage.setTo(registeredUser.getEmail());
-        mailMessage.setFrom(adminEmailId);
-        mailMessage.setSubject("Please reset your password");
-        mailMessage.setText("To reset your password, please click here : "
-                + "http://localhost:8080/customer/confirm-reset-password?token=" + createVerificationToken(registeredUser));
-        emailService.sendEmail(mailMessage);
     }
 
 
@@ -116,6 +98,22 @@ public class UserService {
         return null;
     }
 
+    public void sendActivationMessage(User registeredUser, UserRole userRole) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+
+        mailMessage.setTo(registeredUser.getEmail());
+        mailMessage.setFrom(adminEmailId);
+        if (UserRole.CUSTOMER == userRole) {
+            mailMessage.setSubject("Complete Your Registration!");
+            mailMessage.setText("To confirm your account, please click here : "
+                    + "http://localhost:8080/customer/confirm-account?token=" + createVerificationToken(registeredUser));
+        } else {
+            mailMessage.setSubject("Waiting for approval!");
+            mailMessage.setText("Your account has been created successfully, waiting for approval!");
+        }
+        emailService.sendEmail(mailMessage);
+    }
+
 
     public void sendActivatedMessage(String userEmail) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -136,6 +134,27 @@ public class UserService {
         mailMessage.setText("Your account has been deactivated!");
         emailService.sendEmail(mailMessage);
     }
+
+    public void sendResetPasswordMessage(User registeredUser) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+
+        mailMessage.setTo(registeredUser.getEmail());
+        mailMessage.setFrom(adminEmailId);
+        mailMessage.setSubject("Please reset your password");
+        mailMessage.setText("To reset your password, please click here : "
+                + "http://localhost:8080/customer/confirm-reset-password?token=" + createVerificationToken(registeredUser));
+        emailService.sendEmail(mailMessage);
+    }
+
+    public void sendResetSuccessMessage(String userEmail) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(userEmail);
+        mailMessage.setFrom(adminEmailId);
+        mailMessage.setSubject("Password Reset Successfully");
+        mailMessage.setText("Your password has been reset successfully!");
+        emailService.sendEmail(mailMessage);
+    }
+
 
     public List<Customer> getAllCustomers() {
         return userRepository.findAllCustomers();
@@ -185,12 +204,5 @@ public class UserService {
         verificationTokenRepository.delete(oldToken);
     }
 
-    public void sendResetSuccessMessage(String userEmail) {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(userEmail);
-        mailMessage.setFrom(adminEmailId);
-        mailMessage.setSubject("Password Reset Successfully");
-        mailMessage.setText("Your password has been reset successfully!");
-        emailService.sendEmail(mailMessage);
-    }
+
 }
