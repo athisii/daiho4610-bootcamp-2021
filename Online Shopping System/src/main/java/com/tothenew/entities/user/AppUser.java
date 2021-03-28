@@ -6,7 +6,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -15,12 +14,14 @@ public class AppUser implements UserDetails {
     private String username;
     private String password;
     private boolean isEnabled;
+    private boolean isAccountNonLocked;
     Set<SimpleGrantedAuthority> grantAuthorities;
 
-    public AppUser(String username, String password, boolean isEnabled, Set<SimpleGrantedAuthority> grantAuthorities) {
+    public AppUser(String username, String password, boolean isEnabled, boolean isAccountNonLocked, Set<SimpleGrantedAuthority> grantAuthorities) {
         this.username = username;
         this.password = password;
         this.isEnabled = isEnabled;
+        this.isAccountNonLocked = isAccountNonLocked;
         this.grantAuthorities = grantAuthorities;
     }
 
@@ -46,7 +47,7 @@ public class AppUser implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return isAccountNonLocked;
     }
 
     @Override

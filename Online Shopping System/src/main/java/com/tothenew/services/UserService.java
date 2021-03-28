@@ -12,15 +12,11 @@ import com.tothenew.repos.VerificationTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 
 @Service
@@ -31,14 +27,14 @@ public class UserService {
     String adminEmailId;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private RoleRepository roleRepository;
 
     @Autowired
     private EmailService emailService;
 
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private VerificationTokenRepository verificationTokenRepository;
@@ -50,12 +46,13 @@ public class UserService {
     public static final String TOKEN_INVALID = "invalidToken";
     public static final String TOKEN_VALID = "valid";
 
+    public static final int MAX_FAILED_ATTEMPTS = 3;
 
-    public void findUserByEmail(String email) {
-        User user = userRepository.findByEmail(email);
-        if (user != null) {
-            System.out.println(user);
-        }
+    private static final long LOCK_TIME_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
+
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
 
@@ -63,7 +60,39 @@ public class UserService {
         return roleRepository.findByAuthority("ROLE_" + userRole.name());
     }
 
+    public void increaseFailedAttempts(User user) {
+        int newFailAttempts = user.getFailedAttempt() + 1;
+        userRepository.updateFailedAttempts(newFailAttempts, user.getEmail());
+    }
 
+    public void resetFailedAttempts(String email) {
+        userRepository.updateFailedAttempts(0, email);
+    }
+
+    public void lock(User user) {
+        user.setAccountNonLocked(false);
+        user.setLockTime(new Date());
+
+        userRepository.save(user);
+    }
+
+    public boolean unlockWhenTimeExpired(User user) {
+        long lockTimeInMillis = user.getLockTime().getTime();
+        long currentTimeInMillis = System.currentTimeMillis();
+
+        if (lockTimeInMillis + LOCK_TIME_DURATION < currentTimeInMillis) {
+            user.setAccountNonLocked(true);
+            user.setLockTime(null);
+            user.setFailedAttempt(0);
+            userRepository.save(user);
+            return true;
+        }
+
+        return false;
+    }
+
+
+    //Token Services
     public String createVerificationToken(final User user) {
         final String token = UUID.randomUUID().toString();
         final VerificationToken myToken = new VerificationToken(token, user);
@@ -97,6 +126,8 @@ public class UserService {
         }
         return null;
     }
+
+    //Messages Services
 
     public void sendActivationMessage(User registeredUser, UserRole userRole) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -202,6 +233,24 @@ public class UserService {
         sendResetSuccessMessage(user.getEmail());
         VerificationToken oldToken = verificationTokenRepository.findByToken(token);
         verificationTokenRepository.delete(oldToken);
+    }
+
+    public void sendLockedMessage(String email) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(email);
+        mailMessage.setFrom(adminEmailId);
+        mailMessage.setSubject("Account Locked");
+        mailMessage.setText("Your account has been locked due to 3 failed attempts. It will be unlocked after 24 hours.");
+        emailService.sendEmail(mailMessage);
+    }
+
+    public void sendUnLockedMessage(String email) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(email);
+        mailMessage.setFrom(adminEmailId);
+        mailMessage.setSubject("Account Unlocked");
+        mailMessage.setText("Your account has been unlocked. Please try to login again.");
+        emailService.sendEmail(mailMessage);
     }
 
 

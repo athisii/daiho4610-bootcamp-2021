@@ -1,11 +1,11 @@
 package com.tothenew.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tothenew.entities.user.User;
 import com.tothenew.exception.RequestBodyException;
-import com.tothenew.exception.UserNotFoundException;
+import com.tothenew.objects.UsernameAndPasswordAuthenticationRequest;
 import com.tothenew.services.UserService;
 import io.jsonwebtoken.Jwts;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,7 +29,10 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
     private final UserService userService;
     private String email;
 
-    public JwtUsernameAndPasswordAuthenticationFilter(AuthenticationManager authenticationManager, JwtCofig jwtCofig, SecretKey secretKey, UserService userService) {
+    public JwtUsernameAndPasswordAuthenticationFilter(AuthenticationManager authenticationManager,
+                                                      JwtCofig jwtCofig,
+                                                      SecretKey secretKey,
+                                                      UserService userService) {
         this.authenticationManager = authenticationManager;
         this.jwtCofig = jwtCofig;
         this.secretKey = secretKey;
@@ -38,22 +41,33 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
 
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+            throws AuthenticationException {
         try {
             UsernameAndPasswordAuthenticationRequest emailAndPassword = new ObjectMapper().readValue(request.getInputStream(), UsernameAndPasswordAuthenticationRequest.class);
             email = emailAndPassword.getEmail();
             Authentication authentication = new UsernamePasswordAuthenticationToken(emailAndPassword.getEmail(), emailAndPassword.getPassword());
-            return authenticationManager.authenticate(authentication);
+            Authentication authenticate = authenticationManager.authenticate(authentication);
+            return authenticate;
         } catch (IOException exception) {
             throw new RequestBodyException("Error reading the request body.");
         }
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-                                            FilterChain chain, Authentication authResult) throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain chain,
+                                            Authentication authResult)
+            throws IOException, ServletException {
+        String authEmail = authResult.getName();
+        User user = userService.findUserByEmail(authEmail);
+        if (user.getFailedAttempt() > 0) {
+            userService.resetFailedAttempts(authEmail);
+        }
+
         String token = Jwts.builder()
-                .setSubject(authResult.getName())
+                .setSubject(authEmail)
                 .claim("authorities", authResult.getAuthorities())
                 .setIssuedAt(new Date())
                 .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(jwtCofig.getTokenExpirationAfterDays())))
@@ -64,10 +78,27 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
     }
 
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        System.out.println("Invalid Credentials");
-        System.out.println("Email: " + email);
-        userService.findUserByEmail(email);
+    protected void unsuccessfulAuthentication(HttpServletRequest request,
+                                              HttpServletResponse response,
+                                              AuthenticationException failed)
+            throws IOException, ServletException {
+        User user = userService.findUserByEmail(email);
+
+        if (user != null) {
+            if (user.isActive() && user.isAccountNonLocked()) {
+                if (user.getFailedAttempt() < UserService.MAX_FAILED_ATTEMPTS - 1) {
+                    userService.increaseFailedAttempts(user);
+                } else {
+                    userService.lock(user);
+                    userService.sendLockedMessage(user.getEmail());
+                }
+            } else if (!user.isAccountNonLocked()) {
+                if (userService.unlockWhenTimeExpired(user)) {
+                    userService.sendUnLockedMessage(user.getEmail());
+                }
+            }
+
+        }
         super.unsuccessfulAuthentication(request, response, failed);
 
     }

@@ -24,7 +24,7 @@ public class UserDao {
         if (user != null) {
             Set<SimpleGrantedAuthority> grantAuthorityList = new HashSet<>();
             user.getRoles().forEach(role -> grantAuthorityList.add(new SimpleGrantedAuthority(role.getAuthority())));
-            return new AppUser(user.getEmail(), user.getPassword(), user.isActive(), grantAuthorityList);
+            return new AppUser(user.getEmail(), user.getPassword(), user.isActive(), user.isAccountNonLocked(), grantAuthorityList);
         } else {
             throw new UsernameNotFoundException("No such user found");
         }

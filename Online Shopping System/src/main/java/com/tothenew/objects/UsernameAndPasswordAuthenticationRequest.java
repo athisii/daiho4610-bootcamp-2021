@@ -1,4 +1,4 @@
-package com.tothenew.jwt;
+package com.tothenew.objects;
 
 import lombok.Data;
 

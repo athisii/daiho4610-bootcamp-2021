@@ -10,10 +10,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Data
@@ -32,6 +29,9 @@ public class User {
     private String lastName;
     private boolean isDeleted;
     private boolean isActive;
+    private boolean accountNonLocked = true;
+    private int failedAttempt;
+    private Date lockTime;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
