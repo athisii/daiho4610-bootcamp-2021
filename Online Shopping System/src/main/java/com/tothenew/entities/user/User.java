@@ -1,5 +1,6 @@
 package com.tothenew.entities.user;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,6 +13,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.*;
 
+
+//@JsonFilter("UserFilter")
 @Entity
 @Data
 @EqualsAndHashCode(exclude = {"roles", "addresses"})
@@ -27,6 +30,7 @@ public class User {
     private String firstName;
     private String middleName;
     private String lastName;
+    private String imageUrl;
     private boolean isDeleted;
     private boolean isActive;
     private boolean accountNonLocked = true;
@@ -42,17 +46,4 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Address> addresses = new ArrayList<>();
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", middleName='" + middleName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", isDeleted=" + isDeleted +
-                ", isActive=" + isActive +
-                '}';
-    }
 }

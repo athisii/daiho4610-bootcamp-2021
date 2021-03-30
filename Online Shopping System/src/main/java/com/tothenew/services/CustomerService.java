@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -48,6 +49,9 @@ public class CustomerService {
         ModelMapper mm = new ModelMapper();
         mm.map(customerDto, newCustomer);
         newCustomer.setPassword(passwordEncoder.encode(newCustomer.getPassword()));
+        newCustomer.setContact(customerDto.getPhone().getValue());
+        customerDto.getAddress().setUser(newCustomer);
+        newCustomer.getAddresses().add(customerDto.getAddress());
         Role role_customer = userService.getRole(UserRole.CUSTOMER);
         newCustomer.getRoles().add(role_customer);
         customerRepository.save(newCustomer);
@@ -100,5 +104,11 @@ public class CustomerService {
         }
         userService.sendResetPasswordMessage(user);
     }
+
+    public User profile(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+
 }
 

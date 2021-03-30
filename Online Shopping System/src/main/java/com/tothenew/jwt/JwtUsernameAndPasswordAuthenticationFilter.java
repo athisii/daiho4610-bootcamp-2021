@@ -2,10 +2,12 @@ package com.tothenew.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tothenew.entities.user.User;
+import com.tothenew.exception.ExceptionResponse;
 import com.tothenew.exception.RequestBodyException;
 import com.tothenew.objects.UsernameAndPasswordAuthenticationRequest;
 import com.tothenew.services.UserService;
 import io.jsonwebtoken.Jwts;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,7 +24,6 @@ import java.time.LocalDate;
 import java.util.Date;
 
 public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-
     private final AuthenticationManager authenticationManager;
     private final JwtCofig jwtCofig;
     private final SecretKey secretKey;
@@ -47,8 +48,7 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
             UsernameAndPasswordAuthenticationRequest emailAndPassword = new ObjectMapper().readValue(request.getInputStream(), UsernameAndPasswordAuthenticationRequest.class);
             email = emailAndPassword.getEmail();
             Authentication authentication = new UsernamePasswordAuthenticationToken(emailAndPassword.getEmail(), emailAndPassword.getPassword());
-            Authentication authenticate = authenticationManager.authenticate(authentication);
-            return authenticate;
+            return authenticationManager.authenticate(authentication);
         } catch (IOException exception) {
             throw new RequestBodyException("Error reading the request body.");
         }
@@ -82,6 +82,9 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
                                               HttpServletResponse response,
                                               AuthenticationException failed)
             throws IOException, ServletException {
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        ExceptionResponse response1 = new ExceptionResponse(new Date(), "Bad Credentials", "Invalid Password");
+
         User user = userService.findUserByEmail(email);
 
         if (user != null) {
@@ -91,15 +94,19 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
                 } else {
                     userService.lock(user);
                     userService.sendLockedMessage(user.getEmail());
+                    response1 = new ExceptionResponse(new Date(), "Bad Credentials", "Invalid Password. Your account has been locked due to 3 failed attempts. It will be unlocked after 24 hours.");
                 }
             } else if (!user.isAccountNonLocked()) {
                 if (userService.unlockWhenTimeExpired(user)) {
                     userService.sendUnLockedMessage(user.getEmail());
                 }
+                response1 = new ExceptionResponse(new Date(), "Account Locked", "Your account has been locked due to 3 failed attempts.");
             }
 
         }
-        super.unsuccessfulAuthentication(request, response, failed);
+        new ObjectMapper().writeValue(response.getWriter(), response1);
 
     }
+
+
 }

@@ -17,7 +17,6 @@ public class SellerResource {
     @Autowired
     private SellerService sellerService;
 
-
     @PostMapping
     public ResponseEntity<?> registerSeller(@Valid @RequestBody SellerDto sellerDto) {
         sellerService.registerNewSeller(sellerDto);
@@ -35,8 +34,6 @@ public class SellerResource {
         sellerService.resetPassword(resetPasswordDto, token);
         return new ResponseEntity<>("Password reset successfully!", HttpStatus.OK);
     }
-
-
 
 
 }

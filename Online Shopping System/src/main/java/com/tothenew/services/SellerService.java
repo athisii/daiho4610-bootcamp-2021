@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Collections;
 
 @Service
 public class SellerService {
@@ -44,6 +45,9 @@ public class SellerService {
         ModelMapper mm = new ModelMapper();
         mm.map(sellerDto, newSeller);
         newSeller.setPassword(passwordEncoder.encode(newSeller.getPassword()));
+        newSeller.setCompanyContact(sellerDto.getPhone().getValue());
+        sellerDto.getCompanyAddress().setUser(newSeller);
+        newSeller.setAddresses(Collections.singletonList(sellerDto.getCompanyAddress()));
 
         Role role_seller = userService.getRole(UserRole.SELLER);
         newSeller.getRoles().add(role_seller);
@@ -53,6 +57,7 @@ public class SellerService {
 
 
     }
+
     public void resetPassword(ResetPasswordDto resetPasswordDto, String token) {
         userService.resetPassword(resetPasswordDto, token);
 
@@ -65,8 +70,7 @@ public class SellerService {
         }
         if (user.isActive()) {
             userService.sendResetPasswordMessage(user);
-        }
-        else{
+        } else {
             throw new UserActivationException("Account not activated, waiting for approval!");
         }
 

@@ -1,5 +1,10 @@
 package com.tothenew.resources;
 
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.tothenew.entities.user.Customer;
+import com.tothenew.entities.user.User;
 import com.tothenew.objects.CustomerDto;
 import com.tothenew.objects.EmailDto;
 import com.tothenew.objects.ResetPasswordDto;
@@ -7,10 +12,12 @@ import com.tothenew.services.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.security.Principal;
 
 @RequestMapping("/customer")
 @RestController
@@ -49,6 +56,38 @@ public class CustomerResource {
         customerService.confirmResetPassword(resetPasswordDto, token);
         return new ResponseEntity<>("Password reset successfully!", HttpStatus.OK);
     }
+
+    @GetMapping("/profile")
+    public User profile(Principal user) {
+        System.out.println(user.getName());
+        return customerService.profile(user.getName());
+
+    }
+// @GetMapping("/{customerId}/profile")
+//    public MappingJacksonValue profile(@PathVariable Long customerId) {
+//        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.profile(customerId));
+//        mappingJacksonValue.setFilters(filter());
+//        return mappingJacksonValue;
+//    }
+
+//    @GetMapping("/dynamic")
+//    public MappingJacksonValue retrieveAllDynamicFilterUsers() {
+//        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(filterUserService.getAllDynamicFilterUsers());
+//        mappingJacksonValue.setFilters(filter());
+//        return mappingJacksonValue;
+//    }
+
+//    @PostMapping("/dynamic")
+//    public MappingJacksonValue createDynamicFilterUser(@RequestBody DynamicFilterUser user) {
+//        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(filterUserService.saveDynamicFilterUser(user));
+//        mappingJacksonValue.setFilters(filter());
+//        return mappingJacksonValue;
+//    }
+
+//    private FilterProvider filter() {
+//        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "firstName", "lastName", "contact", "isActive");
+//        return new SimpleFilterProvider().addFilter("UserFilter", filter);
+//    }
 
 
 }

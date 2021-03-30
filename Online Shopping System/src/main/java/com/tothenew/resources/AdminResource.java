@@ -30,13 +30,13 @@ public class AdminResource {
     }
 
     @PutMapping("/activate-user/{userId}")
-    public ResponseEntity<?> activateUser(@PathVariable int userId) {
+    public ResponseEntity<?> activateUser(@PathVariable Long userId) {
         userService.activateUserById(userId);
         return new ResponseEntity<>("User account activated successfully!", HttpStatus.OK);
     }
 
     @PutMapping("/deactivate-user/{userId}")
-    public ResponseEntity<?> deactivateUser(@PathVariable int userId) {
+    public ResponseEntity<?> deactivateUser(@PathVariable Long userId) {
         userService.deactivateUserById(userId);
         return new ResponseEntity<>("User account successfully deactivated!", HttpStatus.OK);
     }

@@ -50,41 +50,49 @@ public class Bootstrap implements ApplicationRunner {
             userRepository.save(admin);
 //
 //
-//            User seller = new Seller();
-//            seller.setEmail("seller@ttn.com");
-//            seller.setPassword(passwordEncoder.encode("password"));
-//            seller.getRoles().add(role_seller);
-//
-//
-//            User customer = new Customer();
-//            customer.setEmail("customer@ttn.com");
-//            customer.setPassword(passwordEncoder.encode("password"));
-//            customer.getRoles().add(role_customer);
-//
-//
-//
-//            Address address1 = new Address();
-//            address1.setCity("New Delhi");
-//            address1.setState("Delhi");
-//            address1.setCountry("India");
-//            address1.setAddressLine("Sant Nagar");
-//            address1.setZipCode("110084");
-//            address1.setLabel("Home");
-//
-//            Address address2 = new Address();
-//            address2.setCity("Mao");
-//            address2.setState("Manipur");
-//            address2.setCountry("India");
-//            address2.setAddressLine("Makhan Khullen");
-//            address2.setZipCode("795014");
-//            address2.setLabel("Home");
-//
-//            seller.getAddresses().add(address1);
-//            customer.getAddresses().add(address2);
-//
-//
-//            userRepository.save(seller);
-//            userRepository.save(customer);
+            Seller seller = new Seller();
+            seller.setEmail("seller@tothenew.com");
+            seller.setPassword(passwordEncoder.encode("password"));
+            seller.getRoles().add(role_seller);
+            seller.setFirstName("John");
+            seller.setLastName("Wick");
+            seller.setActive(true);
+            seller.setCompanyContact("7005703425");
+
+
+            Customer customer = new Customer();
+            customer.setEmail("customer@tothenew.com");
+            customer.setPassword(passwordEncoder.encode("password"));
+            customer.getRoles().add(role_customer);
+            customer.setFirstName("Rose");
+            customer.setLastName("Williams");
+            customer.setActive(true);
+            customer.setContact("8132817645");
+            customer.setImageUrl("image/path/3");
+
+
+            Address address1 = new Address();
+            address1.setCity("New Delhi");
+            address1.setState("Delhi");
+            address1.setCountry("India");
+            address1.setAddressLine("Sant Nagar");
+            address1.setZipCode("110084");
+            address1.setLabel("Home");
+
+            Address address2 = new Address();
+            address2.setCity("Mao");
+            address2.setState("Manipur");
+            address2.setCountry("India");
+            address2.setAddressLine("Makhan Khullen");
+            address2.setZipCode("795014");
+            address2.setLabel("Home");
+
+            seller.getAddresses().add(address1);
+            customer.getAddresses().add(address2);
+
+
+            userRepository.save(seller);
+            userRepository.save(customer);
 //
 //
 ////

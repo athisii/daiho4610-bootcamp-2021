@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.Set;
 
 @Data
-public class AppUser implements UserDetails {
+public class AppUserDetails implements UserDetails {
 
     private String username;
     private String password;
@@ -17,7 +17,7 @@ public class AppUser implements UserDetails {
     private boolean isAccountNonLocked;
     Set<SimpleGrantedAuthority> grantAuthorities;
 
-    public AppUser(String username, String password, boolean isEnabled, boolean isAccountNonLocked, Set<SimpleGrantedAuthority> grantAuthorities) {
+    public AppUserDetails(String username, String password, boolean isEnabled, boolean isAccountNonLocked, Set<SimpleGrantedAuthority> grantAuthorities) {
         this.username = username;
         this.password = password;
         this.isEnabled = isEnabled;

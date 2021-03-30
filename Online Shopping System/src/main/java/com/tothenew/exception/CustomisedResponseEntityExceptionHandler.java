@@ -1,6 +1,5 @@
 package com.tothenew.exception;
 
-import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +23,7 @@ class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHa
                 request.getDescription(false));
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
+    
 
     @ExceptionHandler(EmailExistsException.class)
     public final ResponseEntity<Object> handleEmailExistsException(EmailExistsException ex, WebRequest request) {

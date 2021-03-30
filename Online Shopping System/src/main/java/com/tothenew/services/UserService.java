@@ -195,7 +195,7 @@ public class UserService {
         return userRepository.findAllSellers();
     }
 
-    public void activateUserById(int userId) {
+    public void activateUserById(Long userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         userOptional.orElseThrow(() -> new UserNotFoundException("No user found for id: " + userId));
         userOptional.ifPresent(user -> {
@@ -209,7 +209,7 @@ public class UserService {
         });
     }
 
-    public void deactivateUserById(int userId) {
+    public void deactivateUserById(Long userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         userOptional.orElseThrow(() -> new UserNotFoundException("No user found for id: " + userId));
         userOptional.ifPresent(user -> {
