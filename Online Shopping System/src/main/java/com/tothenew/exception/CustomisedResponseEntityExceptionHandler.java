@@ -23,6 +23,12 @@ class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHa
                 request.getDescription(false));
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(AddressNotFoundException.class)
+    public final ResponseEntity<Object> handleAddressNotFoundException(AddressNotFoundException ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
+                request.getDescription(false));
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
     
 
     @ExceptionHandler(EmailExistsException.class)

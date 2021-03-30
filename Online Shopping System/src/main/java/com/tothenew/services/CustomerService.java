@@ -1,17 +1,10 @@
 package com.tothenew.services;
 
 import com.tothenew.entities.token.VerificationToken;
-import com.tothenew.entities.user.Customer;
-import com.tothenew.entities.user.Role;
-import com.tothenew.entities.user.User;
-import com.tothenew.entities.user.UserRole;
-import com.tothenew.exception.EmailExistsException;
-import com.tothenew.exception.InvalidTokenException;
-import com.tothenew.exception.UserActivationException;
-import com.tothenew.exception.UserNotFoundException;
-import com.tothenew.objects.CustomerDto;
-import com.tothenew.objects.EmailDto;
-import com.tothenew.objects.ResetPasswordDto;
+import com.tothenew.entities.user.*;
+import com.tothenew.exception.*;
+import com.tothenew.objects.*;
+import com.tothenew.repos.AddressRepository;
 import com.tothenew.repos.CustomerRepository;
 import com.tothenew.repos.UserRepository;
 import com.tothenew.repos.VerificationTokenRepository;
@@ -21,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -35,6 +29,9 @@ public class CustomerService {
     private UserRepository userRepository;
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -105,10 +102,56 @@ public class CustomerService {
         userService.sendResetPasswordMessage(user);
     }
 
-    public User profile(String email) {
+    public User viewProfile(String email) {
         return userRepository.findByEmail(email);
     }
 
 
+    public List<Address> addresses(String email) {
+        User user = userService.findUserByEmail(email);
+        return addressRepository.findByUser(user);
+    }
+
+    public void updateProfile(String email, UpdateProfileDto updateProfileDto) {
+
+        User user = userService.findUserByEmail(email);
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.map(updateProfileDto, user);
+        userRepository.save(user);
+    }
+
+    public void updatePassword(String email, ResetPasswordDto resetPasswordDto) {
+        User user = userService.findUserByEmail(email);
+        user.setPassword(passwordEncoder.encode(resetPasswordDto.getPassword()));
+        userService.sendResetSuccessMessage(email);
+        userRepository.save(user);
+    }
+
+    public void addAddress(String email, AddressDto addressDto) {
+        User user = userRepository.findByEmail(email);
+        Address address = new Address();
+        ModelMapper mm = new ModelMapper();
+        mm.map(addressDto, address);
+        address.setUser(user);
+        user.getAddresses().add(address);
+        userRepository.save(user);
+    }
+
+    public void deleteAddress(Long addressId) {
+        Optional<Address> addressOptional = addressRepository.findById(addressId);
+        addressOptional.orElseThrow(() -> new AddressNotFoundException("Address not found for id: " + addressId));
+        addressOptional.ifPresent(address -> addressRepository.delete(address));
+
+    }
+
+    public void updateAddress(AddressDto addressDto, Long addressId) {
+        Optional<Address> addressOptional = addressRepository.findById(addressId);
+        addressOptional.orElseThrow(() -> new AddressNotFoundException("Address not found for id: " + addressId));
+        addressOptional.ifPresent(address -> {
+            ModelMapper mm = new ModelMapper();
+            mm.map(addressDto, address);
+            addressRepository.save(address);
+        });
+    }
 }
 

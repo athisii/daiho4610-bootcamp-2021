@@ -14,7 +14,7 @@ import javax.validation.constraints.Size;
 import java.util.*;
 
 
-//@JsonFilter("UserFilter")
+@JsonFilter("UserFilter")
 @Entity
 @Data
 @EqualsAndHashCode(exclude = {"roles", "addresses"})

@@ -1,23 +1,18 @@
 package com.tothenew.resources;
 
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.tothenew.entities.user.Customer;
+import com.tothenew.entities.user.Address;
 import com.tothenew.entities.user.User;
-import com.tothenew.objects.CustomerDto;
-import com.tothenew.objects.EmailDto;
-import com.tothenew.objects.ResetPasswordDto;
+import com.tothenew.objects.*;
 import com.tothenew.services.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 
 @RequestMapping("/customer")
 @RestController
@@ -58,24 +53,60 @@ public class CustomerResource {
     }
 
     @GetMapping("/profile")
-    public User profile(Principal user) {
-        System.out.println(user.getName());
-        return customerService.profile(user.getName());
+    public User viewProfile(Principal user) {
+        return customerService.viewProfile(user.getName());
 
     }
-// @GetMapping("/{customerId}/profile")
-//    public MappingJacksonValue profile(@PathVariable Long customerId) {
-//        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.profile(customerId));
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@Valid Principal user, @RequestBody UpdateProfileDto updateProfileDto) {
+        customerService.updateProfile(user.getName(), updateProfileDto);
+        return new ResponseEntity<>("Profile updated successfully!", HttpStatus.OK);
+
+
+    }
+
+    @GetMapping("/address")
+    public List<Address> addresses(Principal user) {
+        return customerService.addresses(user.getName());
+
+    }
+
+    @PostMapping("/add-address")
+    public ResponseEntity<String> addAddress(@Valid Principal user, @RequestBody AddressDto addressDto) {
+        customerService.addAddress(user.getName(), addressDto);
+        return new ResponseEntity<>("Address added successfully!", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete-address")
+    public ResponseEntity<String> removeAddress(@RequestParam Long addressId) {
+        customerService.deleteAddress(addressId);
+        return new ResponseEntity<>("Address deleted successfully!", HttpStatus.OK);
+    }
+
+    @PutMapping("/update-address")
+    public ResponseEntity<String> updateAddress(@Valid @RequestBody AddressDto addressDto, @RequestParam Long addressId) {
+        customerService.updateAddress(addressDto, addressId);
+        return new ResponseEntity<>("Address updated successfully!", HttpStatus.OK);
+    }
+
+    //Common to all user.
+    @PutMapping("/update-password")
+    public ResponseEntity<String> updatePassword(@Valid Principal user, @RequestBody ResetPasswordDto resetPasswordDto) {
+        customerService.updatePassword(user.getName(), resetPasswordDto);
+        return new ResponseEntity<>("Password updated successfully!", HttpStatus.OK);
+    }
+
+
+//    @GetMapping("/profile")
+//    public MappingJacksonValue profile(Principal user) {
+//        System.out.println(user.getName());
+//        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.profile(user.getName()));
 //        mappingJacksonValue.setFilters(filter());
 //        return mappingJacksonValue;
 //    }
 
-//    @GetMapping("/dynamic")
-//    public MappingJacksonValue retrieveAllDynamicFilterUsers() {
-//        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(filterUserService.getAllDynamicFilterUsers());
-//        mappingJacksonValue.setFilters(filter());
-//        return mappingJacksonValue;
-//    }
+
 
 //    @PostMapping("/dynamic")
 //    public MappingJacksonValue createDynamicFilterUser(@RequestBody DynamicFilterUser user) {

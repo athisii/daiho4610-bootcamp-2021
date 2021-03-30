@@ -51,7 +51,7 @@ public class Bootstrap implements ApplicationRunner {
 //
 //
             Seller seller = new Seller();
-            seller.setEmail("seller@tothenew.com");
+            seller.setEmail("seller@gmail.com");
             seller.setPassword(passwordEncoder.encode("password"));
             seller.getRoles().add(role_seller);
             seller.setFirstName("John");
@@ -61,7 +61,7 @@ public class Bootstrap implements ApplicationRunner {
 
 
             Customer customer = new Customer();
-            customer.setEmail("customer@tothenew.com");
+            customer.setEmail("athisiiekhe12@gmail.com");
             customer.setPassword(passwordEncoder.encode("password"));
             customer.getRoles().add(role_customer);
             customer.setFirstName("Rose");
@@ -78,6 +78,7 @@ public class Bootstrap implements ApplicationRunner {
             address1.setAddressLine("Sant Nagar");
             address1.setZipCode("110084");
             address1.setLabel("Home");
+            address1.setUser(seller);
 
             Address address2 = new Address();
             address2.setCity("Mao");
@@ -86,6 +87,7 @@ public class Bootstrap implements ApplicationRunner {
             address2.setAddressLine("Makhan Khullen");
             address2.setZipCode("795014");
             address2.setLabel("Home");
+            address2.setUser(customer);
 
             seller.getAddresses().add(address1);
             customer.getAddresses().add(address2);
