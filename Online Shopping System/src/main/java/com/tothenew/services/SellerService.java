@@ -1,16 +1,9 @@
 package com.tothenew.services;
 
-import com.tothenew.entities.user.Role;
-import com.tothenew.entities.user.Seller;
-import com.tothenew.entities.user.User;
-import com.tothenew.entities.user.UserRole;
-import com.tothenew.exception.EmailExistsException;
-import com.tothenew.exception.UserActivationException;
-import com.tothenew.exception.UserAlreadyExistException;
-import com.tothenew.exception.UserNotFoundException;
-import com.tothenew.objects.EmailDto;
-import com.tothenew.objects.ResetPasswordDto;
-import com.tothenew.objects.SellerDto;
+import com.tothenew.entities.user.*;
+import com.tothenew.exception.*;
+import com.tothenew.objects.*;
+import com.tothenew.repos.AddressRepository;
 import com.tothenew.repos.SellerRepository;
 import com.tothenew.repos.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -20,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Collections;
+import java.util.Optional;
 
 @Service
 public class SellerService {
@@ -29,6 +23,9 @@ public class SellerService {
     private UserRepository userRepository;
     @Autowired
     private SellerRepository sellerRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -80,4 +77,22 @@ public class SellerService {
         return userRepository.findByEmail(email) != null;
     }
 
+    public User viewProfile(String email) {
+        return userService.findUserByEmail(email);
+    }
+
+    public void updateProfile(String email, UpdateProfileDto updateProfileDto) {
+        User user = userService.findUserByEmail(email);
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.map(updateProfileDto, user);
+        userRepository.save(user);
+    }
+
+    public void updatePassword(String email, ResetPasswordDto resetPasswordDto) {
+        userService.updatePassword(email, resetPasswordDto);
+    }
+
+    public void updateAddress(AddressDto addressDto, Long addressId) {
+        userService.updateAddress(addressDto, addressId);
+    }
 }

@@ -53,7 +53,6 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         String token = authorizationHeader.substring(7);
         if (!logoutTokenService.isBlacklisted(token)) {
             try {
-//
                 Jws<Claims> claimsJws = Jwts.parserBuilder()
                         .setSigningKey(secretKey)
                         .build()

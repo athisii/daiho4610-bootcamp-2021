@@ -2,13 +2,17 @@ package com.tothenew.services;
 
 import com.tothenew.entities.token.VerificationToken;
 import com.tothenew.entities.user.*;
+import com.tothenew.exception.AddressNotFoundException;
 import com.tothenew.exception.InvalidTokenException;
 import com.tothenew.exception.UserActivationException;
 import com.tothenew.exception.UserNotFoundException;
+import com.tothenew.objects.AddressDto;
 import com.tothenew.objects.ResetPasswordDto;
+import com.tothenew.repos.AddressRepository;
 import com.tothenew.repos.RoleRepository;
 import com.tothenew.repos.UserRepository;
 import com.tothenew.repos.VerificationTokenRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -35,6 +39,8 @@ public class UserService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private AddressRepository addressRepository;
 
     @Autowired
     private VerificationTokenRepository verificationTokenRepository;
@@ -137,7 +143,7 @@ public class UserService {
         if (UserRole.CUSTOMER == userRole) {
             mailMessage.setSubject("Complete Your Registration!");
             mailMessage.setText("To confirm your account, please click here : "
-                    + "http://localhost:8080/customer/confirm-account?token=" + createVerificationToken(registeredUser));
+                    + "http://localhost:8080/registration/customer/confirm-account?token=" + createVerificationToken(registeredUser));
         } else {
             mailMessage.setSubject("Waiting for approval!");
             mailMessage.setText("Your account has been created successfully, waiting for approval!");
@@ -253,5 +259,20 @@ public class UserService {
         emailService.sendEmail(mailMessage);
     }
 
+    public void updatePassword(String email, ResetPasswordDto resetPasswordDto) {
+        User user = findUserByEmail(email);
+        user.setPassword(passwordEncoder.encode(resetPasswordDto.getPassword()));
+        sendResetSuccessMessage(email);
+        userRepository.save(user);
+    }
 
+    public void updateAddress(AddressDto addressDto, Long addressId) {
+        Optional<Address> addressOptional = addressRepository.findById(addressId);
+        addressOptional.orElseThrow(() -> new AddressNotFoundException("Address not found for id: " + addressId));
+        addressOptional.ifPresent(address -> {
+            ModelMapper mm = new ModelMapper();
+            mm.map(addressDto, address);
+            addressRepository.save(address);
+        });
+    }
 }

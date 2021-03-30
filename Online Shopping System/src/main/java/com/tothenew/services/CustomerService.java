@@ -121,10 +121,7 @@ public class CustomerService {
     }
 
     public void updatePassword(String email, ResetPasswordDto resetPasswordDto) {
-        User user = userService.findUserByEmail(email);
-        user.setPassword(passwordEncoder.encode(resetPasswordDto.getPassword()));
-        userService.sendResetSuccessMessage(email);
-        userRepository.save(user);
+        userService.updatePassword(email, resetPasswordDto);
     }
 
     public void addAddress(String email, AddressDto addressDto) {
@@ -145,13 +142,7 @@ public class CustomerService {
     }
 
     public void updateAddress(AddressDto addressDto, Long addressId) {
-        Optional<Address> addressOptional = addressRepository.findById(addressId);
-        addressOptional.orElseThrow(() -> new AddressNotFoundException("Address not found for id: " + addressId));
-        addressOptional.ifPresent(address -> {
-            ModelMapper mm = new ModelMapper();
-            mm.map(addressDto, address);
-            addressRepository.save(address);
-        });
+        userService.updateAddress(addressDto, addressId);
     }
 }
 

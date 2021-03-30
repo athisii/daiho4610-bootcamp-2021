@@ -48,8 +48,8 @@ public class Bootstrap implements ApplicationRunner {
             admin.getRoles().add(role_admin);
             admin.setActive(true);
             userRepository.save(admin);
-//
-//
+
+
             Seller seller = new Seller();
             seller.setEmail("seller@gmail.com");
             seller.setPassword(passwordEncoder.encode("password"));
@@ -95,9 +95,6 @@ public class Bootstrap implements ApplicationRunner {
 
             userRepository.save(seller);
             userRepository.save(customer);
-//
-//
-////
         }
     }
 }

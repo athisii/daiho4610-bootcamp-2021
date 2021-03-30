@@ -1,15 +1,18 @@
 package com.tothenew.resources;
 
 import com.tothenew.entities.user.User;
+import com.tothenew.objects.ResetPasswordDto;
 import com.tothenew.repos.UserRepository;
+import com.tothenew.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 
-@SuppressWarnings("deprecation")
 @RequestMapping("/")
 @RestController
 public class UserResource {
@@ -17,9 +20,9 @@ public class UserResource {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserService userService;
 
-//    @Autowired
-//    private TokenStore tokenStore;
 
     @GetMapping
     public List<User> retrieveAllUsers() {
@@ -36,18 +39,6 @@ public class UserResource {
     public String customerHome() {
         return "Customer home";
     }
-
-//    @GetMapping("/doLogout")
-//    public String logout(HttpServletRequest request) {
-//        String authHeader = request.getHeader("Authorization");
-//        if (authHeader != null) {
-//            String tokenValue = authHeader.replace("Bearer", "").trim();
-//            OAuth2AccessToken accessToken = tokenStore.readAccessToken(tokenValue);
-//            tokenStore.removeAccessToken(accessToken);
-//        }
-//        return "Logged out successfully";
-//    }
-
 
 
 
