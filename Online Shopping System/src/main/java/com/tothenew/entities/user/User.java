@@ -1,20 +1,18 @@
 package com.tothenew.entities.user;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springframework.boot.cloud.CloudFoundryVcapEnvironmentPostProcessor;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.*;
 
 
-//@JsonFilter("UserFilter")
+@JsonFilter("userFilter")
+@JsonInclude(value = Include.NON_EMPTY)
 @Entity
 @Data
 @EqualsAndHashCode(exclude = {"roles", "addresses"})
@@ -26,11 +24,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String email;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private String firstName;
     private String middleName;
     private String lastName;
-    private String imageUrl;
+    private String imageUrl = "img/customer/" + id;
     private boolean isDeleted;
     private boolean isActive;
     private boolean accountNonLocked = true;

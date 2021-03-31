@@ -1,15 +1,15 @@
 package com.tothenew.resources;
 
 
-import com.tothenew.entities.user.Customer;
-import com.tothenew.entities.user.Seller;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.tothenew.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 
 @RequestMapping("/admin")
@@ -20,25 +20,34 @@ public class AdminResource {
     private UserService userService;
 
     @GetMapping("/customer")
-    public List<Customer> retrieveAllCustomers() {
-        return userService.getAllCustomers();
+    public MappingJacksonValue profile() {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(userService.getAllCustomers());
+        mappingJacksonValue.setFilters(filter());
+        return mappingJacksonValue;
     }
 
     @GetMapping("/seller")
-    public List<Seller> retrieveAllSellers() {
-        return userService.getAllSellers();
+    public MappingJacksonValue retrieveAllSellers() {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(userService.getAllSellers());
+        mappingJacksonValue.setFilters(filter());
+        return mappingJacksonValue;
     }
 
-    @PutMapping("/activate-user/{userId}")
-    public ResponseEntity<?> activateUser(@PathVariable Long userId) {
+    @PutMapping("/activate-user")
+    public ResponseEntity<?> activateUser(@RequestParam Long userId) {
         userService.activateUserById(userId);
         return new ResponseEntity<>("User account activated successfully!", HttpStatus.OK);
     }
 
-    @PutMapping("/deactivate-user/{userId}")
-    public ResponseEntity<?> deactivateUser(@PathVariable Long userId) {
+    @PutMapping("/deactivate-user")
+    public ResponseEntity<?> deactivateUser(@RequestParam Long userId) {
         userService.deactivateUserById(userId);
         return new ResponseEntity<>("User account successfully deactivated!", HttpStatus.OK);
+    }
+
+    private FilterProvider filter() {
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAll();
+        return new SimpleFilterProvider().addFilter("userFilter", filter);
     }
 
 

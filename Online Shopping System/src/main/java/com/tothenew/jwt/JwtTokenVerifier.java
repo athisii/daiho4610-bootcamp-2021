@@ -1,5 +1,6 @@
 package com.tothenew.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.tothenew.exception.InvalidTokenException;
 import com.tothenew.services.LogoutTokenService;
@@ -52,6 +53,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
         String token = authorizationHeader.substring(7);
         if (!logoutTokenService.isBlacklisted(token)) {
+
             try {
                 Jws<Claims> claimsJws = Jwts.parserBuilder()
                         .setSigningKey(secretKey)
@@ -60,15 +62,14 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
                 Claims body = claimsJws.getBody();
                 String email = body.getSubject();
                 var authorities = (List<Map<String, String>>) body.get("authorities");
-                Set<SimpleGrantedAuthority> simpleGrantedAuthorities = authorities.stream()
+                Set<SimpleGrantedAuthority> roles = authorities.stream()
                         .map(role -> new SimpleGrantedAuthority(role.get("authority")))
                         .collect(Collectors.toSet());
 
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email, null, simpleGrantedAuthorities);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email, null, roles);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (JwtException ignored) {
             }
-
         }
         filterChain.doFilter(request, response);
     }

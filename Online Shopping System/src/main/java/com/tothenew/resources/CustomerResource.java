@@ -1,15 +1,17 @@
 package com.tothenew.resources;
 
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.tothenew.entities.user.Address;
-import com.tothenew.entities.user.User;
 import com.tothenew.objects.*;
 import com.tothenew.services.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
@@ -20,14 +22,13 @@ public class CustomerResource {
     @Autowired
     private CustomerService customerService;
 
-    //Customer Registration
+
     @PostMapping("/registration/customer")
-    public ResponseEntity<Object> registerCustomer(@Valid @RequestBody CustomerDto customerDto, final HttpServletRequest request) {
+    public ResponseEntity<Object> registerCustomer(@Valid @RequestBody CustomerDto customerDto) {
         customerService.registerNewCustomer(customerDto);
         return new ResponseEntity<>("Your account has been created successfully, please check your email for activation.", HttpStatus.OK);
     }
 
-    // Customer activation - verification
     @PutMapping("/registration/customer/confirm-account")
     public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token) {
         customerService.confirmRegisteredCustomer(token);
@@ -46,30 +47,16 @@ public class CustomerResource {
         return new ResponseEntity<>("Link to reset the password has been sent.", HttpStatus.OK);
     }
 
-    @PutMapping("/confirm-reset-password/customer")
-    public ResponseEntity<?> confirmResetPassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto, @RequestParam("token") String token) {
-        customerService.confirmResetPassword(resetPasswordDto, token);
-        return new ResponseEntity<>("Password reset successfully!", HttpStatus.OK);
-    }
-
-    @GetMapping("/customer/profile")
-    public User viewProfile(Principal user) {
-        return customerService.viewProfile(user.getName());
-
-    }
 
     @PutMapping("/customer/profile")
     public ResponseEntity<?> updateProfile(@Valid Principal user, @RequestBody UpdateProfileDto updateProfileDto) {
         customerService.updateProfile(user.getName(), updateProfileDto);
         return new ResponseEntity<>("Profile updated successfully!", HttpStatus.OK);
-
-
     }
 
     @GetMapping("/customer/address")
     public List<Address> addresses(Principal user) {
         return customerService.addresses(user.getName());
-
     }
 
     @PostMapping("/customer/add-address")
@@ -97,19 +84,18 @@ public class CustomerResource {
     }
 
 
-//    @GetMapping("/profile")
-//    public MappingJacksonValue profile(Principal user) {
-//        System.out.println(user.getName());
-//        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.profile(user.getName()));
-//        mappingJacksonValue.setFilters(filter());
-//        return mappingJacksonValue;
-//    }
+    @GetMapping("/customer/profile")
+    public MappingJacksonValue profile(Principal user) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.viewProfile(user.getName()));
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "firstName", "lastName", "imageUrl", "contact", "active");
+        mappingJacksonValue.setFilters(filter(filter));
+        return mappingJacksonValue;
+    }
 
 
-//    private FilterProvider filter() {
-//        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "firstName", "lastName", "contact", "isActive");
-//        return new SimpleFilterProvider().addFilter("UserFilter", filter);
-//    }
+    private FilterProvider filter(SimpleBeanPropertyFilter filter) {
+        return new SimpleFilterProvider().addFilter("userFilter", filter);
+    }
 
 
 }

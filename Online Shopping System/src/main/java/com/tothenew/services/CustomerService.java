@@ -75,6 +75,9 @@ public class CustomerService {
         if (user == null) {
             throw new UserNotFoundException("No such email found!");
         }
+        if (user.isActive()) {
+            throw new UserActivationException("User already activated");
+        }
         VerificationToken oldToken = verificationTokenRepository.findTokenByUserId(user.getId());
         verificationTokenRepository.delete(oldToken);
         userService.sendActivationMessage(user, UserRole.CUSTOMER);
@@ -138,7 +141,6 @@ public class CustomerService {
         Optional<Address> addressOptional = addressRepository.findById(addressId);
         addressOptional.orElseThrow(() -> new AddressNotFoundException("Address not found for id: " + addressId));
         addressOptional.ifPresent(address -> addressRepository.delete(address));
-
     }
 
     public void updateAddress(AddressDto addressDto, Long addressId) {

@@ -179,7 +179,7 @@ public class UserService {
         mailMessage.setFrom(adminEmailId);
         mailMessage.setSubject("Please reset your password");
         mailMessage.setText("To reset your password, please click here : "
-                + "http://localhost:8080/customer/confirm-reset-password?token=" + createVerificationToken(registeredUser));
+                + "http://localhost:8080/reset-password/confirm?token=" + createVerificationToken(registeredUser));
         emailService.sendEmail(mailMessage);
     }
 

@@ -25,21 +25,15 @@ public class UserResource {
 
 
     @GetMapping
-    public List<User> retrieveAllUsers() {
-        return userRepository.findAll();
+    public String home() {
+        return "Welcome to Online Shopping System";
     }
+    
 
-
-    @GetMapping("/admin/home")
-    public String adminHome() {
-        return "Admin home";
+    @PutMapping("/reset-password/confirm")
+    public ResponseEntity<?> confirmResetPassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto, @RequestParam("token") String token) {
+        userService.resetPassword(resetPasswordDto, token);
+        return new ResponseEntity<>("Password reset successfully!", HttpStatus.OK);
     }
-
-    @GetMapping("/user/home")
-    public String customerHome() {
-        return "Customer home";
-    }
-
-
 
 }
