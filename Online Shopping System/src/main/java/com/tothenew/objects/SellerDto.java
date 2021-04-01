@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class SellerDto extends UserDto {
-    //    GST
+    private String GST;
     @NotEmpty
     @NotNull
     private String companyName;

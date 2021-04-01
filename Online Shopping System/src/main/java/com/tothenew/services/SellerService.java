@@ -4,8 +4,8 @@ import com.tothenew.entities.user.*;
 import com.tothenew.exception.*;
 import com.tothenew.objects.*;
 import com.tothenew.repos.AddressRepository;
-import com.tothenew.repos.SellerRepository;
-import com.tothenew.repos.UserRepository;
+import com.tothenew.repos.user.SellerRepository;
+import com.tothenew.repos.user.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Collections;
-import java.util.Optional;
 
 @Service
 public class SellerService {

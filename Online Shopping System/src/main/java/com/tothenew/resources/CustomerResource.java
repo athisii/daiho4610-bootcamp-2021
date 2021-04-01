@@ -23,19 +23,19 @@ public class CustomerResource {
     private CustomerService customerService;
 
 
-    @PostMapping("/registration/customer")
+    @PostMapping("/register/customer")
     public ResponseEntity<Object> registerCustomer(@Valid @RequestBody CustomerDto customerDto) {
         customerService.registerNewCustomer(customerDto);
         return new ResponseEntity<>("Your account has been created successfully, please check your email for activation.", HttpStatus.OK);
     }
 
-    @PutMapping("/registration/customer/confirm-account")
+    @PutMapping("/register/customer/confirm-account")
     public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token) {
         customerService.confirmRegisteredCustomer(token);
         return new ResponseEntity<>("Your account has been verified successfully! You can now log in.", HttpStatus.OK);
     }
 
-    @PostMapping("/registration/customer/resend-token")
+    @PostMapping("/register/customer/resend-token")
     public ResponseEntity<?> resendRegistrationToken(@Valid @RequestBody EmailDto emailDto) {
         customerService.resendToken(emailDto);
         return new ResponseEntity<>("Activation link has been resent.", HttpStatus.OK);

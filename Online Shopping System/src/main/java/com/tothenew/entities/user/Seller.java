@@ -16,7 +16,7 @@ import java.util.List;
 @Data
 @PrimaryKeyJoinColumn(name = "id")
 public class Seller extends User {
-    private Double gst;
+    private String GST;
     private String companyName;
     private String companyContact;
 

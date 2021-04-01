@@ -1,8 +1,16 @@
 package com.tothenew;
 
+import com.tothenew.entities.product.Category;
+import com.tothenew.entities.product.CategoryMetadataField;
+import com.tothenew.entities.product.CategoryMetadataFieldValues;
+import com.tothenew.entities.product.ParentCategory;
 import com.tothenew.entities.user.*;
 import com.tothenew.repos.RoleRepository;
-import com.tothenew.repos.UserRepository;
+import com.tothenew.repos.product.CategoryMetadataFieldRepository;
+import com.tothenew.repos.product.CategoryMetadataFieldValuesRepository;
+import com.tothenew.repos.product.CategoryRepository;
+import com.tothenew.repos.product.ParentCategoryRepository;
+import com.tothenew.repos.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -22,9 +30,21 @@ public class Bootstrap implements ApplicationRunner {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private CategoryMetadataFieldRepository categoryMetadataFieldRepository;
+
+    @Autowired
+    private ParentCategoryRepository parentCategoryRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+    @Autowired
+    private CategoryMetadataFieldValuesRepository categoryMetadataFieldValuesRepository;
+
+
     @Transactional
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
         if (userRepository.count() < 1) {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -47,7 +67,6 @@ public class Bootstrap implements ApplicationRunner {
             admin.setLastName("");
             admin.getRoles().add(role_admin);
             admin.setActive(true);
-            userRepository.save(admin);
 
 
             Seller seller = new Seller();
@@ -91,10 +110,34 @@ public class Bootstrap implements ApplicationRunner {
 
             seller.getAddresses().add(address1);
             customer.getAddresses().add(address2);
+            userRepository.saveAll(List.of(admin, seller, customer));
 
 
-            userRepository.save(seller);
-            userRepository.save(customer);
+            //Product
+            ParentCategory fashion = new ParentCategory("Fashion");
+
+            CategoryMetadataField cmf1 = new CategoryMetadataField("Size");
+            CategoryMetadataField cmf2 = new CategoryMetadataField("Colour");
+            CategoryMetadataField cmf3 = new CategoryMetadataField("Length");
+
+
+            Category shoe = new Category("Shoe");
+            shoe.setParentCategory(fashion);
+            Category shirt = new Category("Shirt");
+            shirt.setParentCategory(fashion);
+            Category tshirt = new Category("Tshirt");
+            tshirt.setParentCategory(fashion);
+
+            CategoryMetadataFieldValues cmfv = new CategoryMetadataFieldValues();
+            cmfv.setCategory(shoe);
+            cmfv.setCategoryMetadataField(cmf1);
+            cmfv.setValue("7,8,9,10");
+
+
+            parentCategoryRepository.save(fashion);
+            categoryRepository.saveAll(List.of(shoe, shirt, tshirt));
+            categoryMetadataFieldRepository.saveAll(List.of(cmf1, cmf2, cmf3));
+            categoryMetadataFieldValuesRepository.save(cmfv);
         }
     }
 }

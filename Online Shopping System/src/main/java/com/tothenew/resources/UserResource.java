@@ -1,8 +1,7 @@
 package com.tothenew.resources;
 
-import com.tothenew.entities.user.User;
 import com.tothenew.objects.ResetPasswordDto;
-import com.tothenew.repos.UserRepository;
+import com.tothenew.repos.user.UserRepository;
 import com.tothenew.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.security.Principal;
-import java.util.List;
 
 @RequestMapping("/")
 @RestController

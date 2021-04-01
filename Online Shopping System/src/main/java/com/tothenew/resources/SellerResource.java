@@ -20,13 +20,13 @@ public class SellerResource {
     @Autowired
     private SellerService sellerService;
 
-    @PostMapping("/registration/seller")
+    @PostMapping("/register/seller")
     public ResponseEntity<?> registerSeller(@Valid @RequestBody SellerDto sellerDto) {
         sellerService.registerNewSeller(sellerDto);
         return new ResponseEntity<>("Your account has been created successfully, waiting for approval!", HttpStatus.OK);
     }
 
-    @PostMapping("/reset-password")
+    @PostMapping("/reset-password/seller")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody EmailDto emailDto) {
         sellerService.resendToken(emailDto);
         return new ResponseEntity<>("Link to reset the password has been sent.", HttpStatus.OK);

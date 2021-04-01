@@ -1,4 +1,4 @@
-package com.tothenew.repos;
+package com.tothenew.repos.user;
 
 import com.tothenew.entities.user.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;

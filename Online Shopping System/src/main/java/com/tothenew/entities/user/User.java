@@ -16,7 +16,6 @@ import java.util.*;
 @Entity
 @Data
 @EqualsAndHashCode(exclude = {"roles", "addresses"})
-//@JsonIgnoreProperties(value = {"password", "addresses", "roles"})
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User {
 

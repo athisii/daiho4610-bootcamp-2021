@@ -10,7 +10,7 @@ import com.tothenew.objects.AddressDto;
 import com.tothenew.objects.ResetPasswordDto;
 import com.tothenew.repos.AddressRepository;
 import com.tothenew.repos.RoleRepository;
-import com.tothenew.repos.UserRepository;
+import com.tothenew.repos.user.UserRepository;
 import com.tothenew.repos.VerificationTokenRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,7 +143,7 @@ public class UserService {
         if (UserRole.CUSTOMER == userRole) {
             mailMessage.setSubject("Complete Your Registration!");
             mailMessage.setText("To confirm your account, please click here : "
-                    + "http://localhost:8080/registration/customer/confirm-account?token=" + createVerificationToken(registeredUser));
+                    + "http://localhost:8080/register/customer/confirm-account?token=" + createVerificationToken(registeredUser));
         } else {
             mailMessage.setSubject("Waiting for approval!");
             mailMessage.setText("Your account has been created successfully, waiting for approval!");

@@ -65,7 +65,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/seller/**").hasRole("SELLER")
                 .antMatchers("/customer/**").hasRole("CUSTOMER")
-                .antMatchers("/", "/registration/**", "/reset-password/**").permitAll()
+                .antMatchers("/", "/register/**", "/reset-password/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
@@ -73,6 +73,5 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .logout().logoutSuccessHandler(logoutSuccessHandler);
     }
-
 
 }

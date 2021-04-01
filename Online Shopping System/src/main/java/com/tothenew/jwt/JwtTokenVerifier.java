@@ -1,6 +1,5 @@
 package com.tothenew.jwt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.tothenew.exception.InvalidTokenException;
 import com.tothenew.services.LogoutTokenService;

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
 
@@ -23,13 +24,28 @@ class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHa
                 request.getDescription(false));
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(AddressNotFoundException.class)
     public final ResponseEntity<Object> handleAddressNotFoundException(AddressNotFoundException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
                 request.getDescription(false));
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
-    
+
+    //    @ExceptionHandler(CustomAuthenticationException.class)
+//    public ResponseEntity<Object> handleAuthenticationException(CustomAuthenticationException ex, HttpServletResponse response) {
+//        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(), "Invalid Token");
+//        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+//        return new ResponseEntity<>(exceptionResponse, HttpStatus.UNAUTHORIZED);
+//    }
+
+    @ExceptionHandler(CategoryMetadataFieldException.class)
+    public final ResponseEntity<Object> handleCategoryMetadataFieldException(CategoryMetadataFieldException ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
+                request.getDescription(false));
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
+
 
     @ExceptionHandler(EmailExistsException.class)
     public final ResponseEntity<Object> handleEmailExistsException(EmailExistsException ex, WebRequest request) {
