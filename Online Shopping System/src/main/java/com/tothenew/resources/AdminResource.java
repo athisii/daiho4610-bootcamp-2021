@@ -4,10 +4,14 @@ package com.tothenew.resources;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.tothenew.entities.product.Category;
 import com.tothenew.entities.product.CategoryMetadataField;
+import com.tothenew.objects.CreateCategoryDto;
 import com.tothenew.objects.CategoryMetadataFieldDto;
-import com.tothenew.services.AdminService;
-import com.tothenew.services.UserService;
+import com.tothenew.objects.categorymetadata.CategoryMetadataFieldValuesDto;
+import com.tothenew.objects.UpdateCategoryDto;
+import com.tothenew.services.user.AdminService;
+import com.tothenew.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,11 +68,45 @@ public class AdminResource {
         return adminService.getAllCategoryMetadataFields();
     }
 
-
     @PostMapping("/add-metadata-field")
     public ResponseEntity<String> createMetadataField(@Valid @RequestBody CategoryMetadataFieldDto categoryMetadataFieldDto) {
         Long id = adminService.addMetadataField(categoryMetadataFieldDto);
-        return new ResponseEntity<>("Metadata Field Added Successfully with id: " + id, HttpStatus.OK);
+        return new ResponseEntity<>("New Metadata Field Added Successfully with id: " + id, HttpStatus.OK);
+    }
+
+    @PostMapping("/add-category")
+    public ResponseEntity<String> createCategory(@Valid @RequestBody CreateCategoryDto categoryDto) {
+        Long id = adminService.addCategory(categoryDto);
+        return new ResponseEntity<>("New Category Added Successfully with id: " + id, HttpStatus.OK);
+
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public Category viewCategory(@PathVariable Long categoryId) {
+        return adminService.getCategoryById(categoryId);
+    }
+
+    @GetMapping("/category")
+    public List<Category> viewAllCategories() {
+        return adminService.getAllCategories();
+    }
+
+    @PutMapping("/update-category")
+    public ResponseEntity<String> updateCategory(@Valid @RequestBody UpdateCategoryDto updateCategoryDto) {
+        adminService.updateCategory(updateCategoryDto);
+        return new ResponseEntity<>("Updated Successfully", HttpStatus.OK);
+    }
+
+    @PostMapping("/add-category-metadata-field-values")
+    public ResponseEntity<String> createCategoryMetadataFieldValues(@Valid @RequestBody CategoryMetadataFieldValuesDto createCategoryMetadataFieldValues) {
+        adminService.addCategoryMetadataFieldValues(createCategoryMetadataFieldValues);
+        return new ResponseEntity<>("Added Successfully", HttpStatus.OK);
+    }
+
+    @PutMapping("update-category-metadata-field-values")
+    public ResponseEntity<String> updateCategoryMetadataFieldValues(@Valid @RequestBody CategoryMetadataFieldValuesDto createCategoryMetadataFieldValues) {
+        adminService.updateCategoryMetadataFieldValues(createCategoryMetadataFieldValues);
+        return new ResponseEntity<>("Updated Successfully", HttpStatus.OK);
     }
 
 

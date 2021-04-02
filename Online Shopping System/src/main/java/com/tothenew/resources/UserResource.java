@@ -2,7 +2,7 @@ package com.tothenew.resources;
 
 import com.tothenew.objects.ResetPasswordDto;
 import com.tothenew.repos.user.UserRepository;
-import com.tothenew.services.UserService;
+import com.tothenew.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

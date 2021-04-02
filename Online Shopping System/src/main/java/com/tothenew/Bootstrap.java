@@ -133,9 +133,8 @@ public class Bootstrap implements ApplicationRunner {
             cmfv.setCategoryMetadataField(cmf1);
             cmfv.setValue("7,8,9,10");
 
-
+            fashion.getCategories().addAll(List.of(shirt, shoe, tshirt));
             parentCategoryRepository.save(fashion);
-            categoryRepository.saveAll(List.of(shoe, shirt, tshirt));
             categoryMetadataFieldRepository.saveAll(List.of(cmf1, cmf2, cmf3));
             categoryMetadataFieldValuesRepository.save(cmfv);
         }

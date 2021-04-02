@@ -1,10 +1,10 @@
 package com.tothenew.objects;
 
-import lombok.Data;
+import lombok.Getter;
 
 import javax.validation.constraints.Email;
 
-@Data
+@Getter
 public class UsernameAndPasswordAuthenticationRequest {
     @Email
     private String email;

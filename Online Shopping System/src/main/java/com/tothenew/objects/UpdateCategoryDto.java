@@ -6,8 +6,9 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @Getter
-public class CategoryMetadataFieldDto {
+public class UpdateCategoryDto {
     @NotNull
+    private Long id;
     @NotEmpty
     private String name;
 }

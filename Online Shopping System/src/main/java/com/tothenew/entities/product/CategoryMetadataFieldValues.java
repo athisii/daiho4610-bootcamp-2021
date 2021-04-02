@@ -1,5 +1,6 @@
 package com.tothenew.entities.product;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -7,6 +8,7 @@ import javax.persistence.*;
 @Entity
 @Data
 public class CategoryMetadataFieldValues {
+    @JsonIgnore
     @EmbeddedId
     private CategoryMetadataFieldKey categoryMetadataFieldKey = new CategoryMetadataFieldKey();
 

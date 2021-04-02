@@ -1,5 +1,6 @@
 package com.tothenew.entities.product;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,13 +16,20 @@ public class ParentCategory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-
-//    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL)
-//    private List<Category> categories = new ArrayList<>();
+    @JsonIgnore
+    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL)
+    private List<Category> categories = new ArrayList<>();
 
     public ParentCategory(String name) {
         this.name = name;
     }
 
-
+    @Override
+    public String toString() {
+        return "ParentCategory{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", categories=" + categories +
+                '}';
+    }
 }

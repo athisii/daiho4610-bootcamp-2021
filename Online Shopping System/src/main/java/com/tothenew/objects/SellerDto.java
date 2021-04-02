@@ -1,14 +1,14 @@
 package com.tothenew.objects;
 
 import com.tothenew.entities.user.Address;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
 public class SellerDto extends UserDto {
     private String GST;
     @NotEmpty

@@ -1,11 +1,11 @@
 package com.tothenew.objects;
 
-import lombok.Data;
+import lombok.Getter;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-@Data
+@Getter
 public class UpdateProfileDto {
 
     @NotNull

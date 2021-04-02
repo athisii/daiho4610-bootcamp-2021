@@ -1,4 +1,4 @@
-package com.tothenew.services;
+package com.tothenew.services.user;
 
 import com.tothenew.entities.user.AppUserDetails;
 import com.tothenew.entities.user.User;

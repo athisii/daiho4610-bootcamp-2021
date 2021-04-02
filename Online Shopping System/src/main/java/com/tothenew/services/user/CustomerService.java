@@ -1,4 +1,4 @@
-package com.tothenew.services;
+package com.tothenew.services.user;
 
 import com.tothenew.entities.token.VerificationToken;
 import com.tothenew.entities.user.*;
@@ -36,10 +36,9 @@ public class CustomerService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public void registerNewCustomer(CustomerDto customerDto)
-            throws EmailExistsException {
+    public void registerNewCustomer(CustomerDto customerDto) throws EmailExistsException {
 
-        if (emailExists(customerDto.getEmail())) {
+        if (checkIfEmailExists(customerDto.getEmail())) {
             throw new EmailExistsException("Email already registered");
         }
         Customer newCustomer = new Customer();
@@ -85,7 +84,7 @@ public class CustomerService {
     }
 
 
-    private boolean emailExists(String email) {
+    private boolean checkIfEmailExists(String email) {
         return userRepository.findByEmail(email) != null;
     }
 

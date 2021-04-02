@@ -5,7 +5,7 @@ import com.tothenew.entities.user.User;
 import com.tothenew.exception.ExceptionResponse;
 import com.tothenew.exception.RequestBodyException;
 import com.tothenew.objects.UsernameAndPasswordAuthenticationRequest;
-import com.tothenew.services.UserService;
+import com.tothenew.services.user.UserService;
 import io.jsonwebtoken.Jwts;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;

@@ -3,11 +3,10 @@ package com.tothenew.objects;
 import lombok.Getter;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 @Getter
-public class CategoryMetadataFieldDto {
-    @NotNull
+public class CreateCategoryDto {
     @NotEmpty
     private String name;
+    private Long categoryParentId;
 }

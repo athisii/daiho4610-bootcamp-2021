@@ -1,4 +1,4 @@
-package com.tothenew.services;
+package com.tothenew.services.user;
 
 import com.tothenew.entities.token.VerificationToken;
 import com.tothenew.entities.user.*;
@@ -12,6 +12,7 @@ import com.tothenew.repos.AddressRepository;
 import com.tothenew.repos.RoleRepository;
 import com.tothenew.repos.user.UserRepository;
 import com.tothenew.repos.VerificationTokenRepository;
+import com.tothenew.services.EmailService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

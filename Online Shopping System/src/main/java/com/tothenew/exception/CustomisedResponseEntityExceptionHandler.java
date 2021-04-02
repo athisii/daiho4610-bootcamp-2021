@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
 
@@ -32,6 +31,14 @@ class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHa
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(CategoryExistException.class)
+    public final ResponseEntity<Object> handleCategoryExistException(CategoryExistException ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
+                request.getDescription(false));
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
     //    @ExceptionHandler(CustomAuthenticationException.class)
 //    public ResponseEntity<Object> handleAuthenticationException(CustomAuthenticationException ex, HttpServletResponse response) {
 //        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(), "Invalid Token");
@@ -43,7 +50,7 @@ class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHa
     public final ResponseEntity<Object> handleCategoryMetadataFieldException(CategoryMetadataFieldException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
                 request.getDescription(false));
-        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
@@ -79,7 +86,7 @@ class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHa
     public final ResponseEntity<Object> handleUserAlreadyActivatedException(UserActivationException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
                 request.getDescription(false));
-        return new ResponseEntity<>(exceptionResponse, HttpStatus.OK);
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
