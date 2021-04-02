@@ -1,5 +1,6 @@
 package com.tothenew.entities.product;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -18,6 +19,7 @@ import java.util.List;
         property = "id"
 )
 //@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonFilter("CategoryFilter")
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

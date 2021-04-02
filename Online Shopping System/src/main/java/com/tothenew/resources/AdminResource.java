@@ -22,7 +22,6 @@ import javax.validation.Valid;
 import java.util.List;
 
 
-@RequestMapping("/admin")
 @RestController
 public class AdminResource {
 
@@ -32,14 +31,14 @@ public class AdminResource {
     @Autowired
     private AdminService adminService;
 
-    @GetMapping("/customer")
+    @GetMapping("/admin/customer")
     public MappingJacksonValue profile() {
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(userService.getAllCustomers());
         mappingJacksonValue.setFilters(filter());
         return mappingJacksonValue;
     }
 
-    @GetMapping("/seller")
+    @GetMapping("/admin/seller")
     public MappingJacksonValue retrieveAllSellers() {
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(userService.getAllSellers());
         mappingJacksonValue.setFilters(filter());
@@ -51,59 +50,57 @@ public class AdminResource {
         return new SimpleFilterProvider().addFilter("userFilter", filter);
     }
 
-    @PutMapping("/activate-user")
+    @PutMapping("/admin/activate-user")
     public ResponseEntity<?> activateUser(@RequestParam Long userId) {
         userService.activateUserById(userId);
         return new ResponseEntity<>("User account activated successfully!", HttpStatus.OK);
     }
 
-    @PutMapping("/deactivate-user")
+    @PutMapping("/admin/deactivate-user")
     public ResponseEntity<?> deactivateUser(@RequestParam Long userId) {
         userService.deactivateUserById(userId);
         return new ResponseEntity<>("User account successfully deactivated!", HttpStatus.OK);
     }
 
-    @GetMapping("/metadata-field")
+    @GetMapping("/admin/metadata-field")
     public List<CategoryMetadataField> retrieveAllCategoryMetadataFields() {
         return adminService.getAllCategoryMetadataFields();
     }
 
-    @PostMapping("/add-metadata-field")
+    @PostMapping("/admin/add-metadata-field")
     public ResponseEntity<String> createMetadataField(@Valid @RequestBody CategoryMetadataFieldDto categoryMetadataFieldDto) {
         Long id = adminService.addMetadataField(categoryMetadataFieldDto);
         return new ResponseEntity<>("New Metadata Field Added Successfully with id: " + id, HttpStatus.OK);
     }
 
-    @PostMapping("/add-category")
+    @PostMapping("/admin/add-category")
     public ResponseEntity<String> createCategory(@Valid @RequestBody CreateCategoryDto categoryDto) {
         Long id = adminService.addCategory(categoryDto);
         return new ResponseEntity<>("New Category Added Successfully with id: " + id, HttpStatus.OK);
 
     }
 
-    @GetMapping("/category/{categoryId}")
-    public Category viewCategory(@PathVariable Long categoryId) {
-        return adminService.getCategoryById(categoryId);
+    @GetMapping("/admin/category/{categoryId}")
+    public MappingJacksonValue viewCategory(@PathVariable Long categoryId) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getCategoryById(categoryId));
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "parentCategory", "categoryMetadataFieldValues");
+        mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("CategoryFilter", filter));
+        return mappingJacksonValue;
     }
 
-    @GetMapping("/category")
-    public List<Category> viewAllCategories() {
-        return adminService.getAllCategories();
-    }
-
-    @PutMapping("/update-category")
+    @PutMapping("/admin/update-category")
     public ResponseEntity<String> updateCategory(@Valid @RequestBody UpdateCategoryDto updateCategoryDto) {
         adminService.updateCategory(updateCategoryDto);
         return new ResponseEntity<>("Updated Successfully", HttpStatus.OK);
     }
 
-    @PostMapping("/add-category-metadata-field-values")
+    @PostMapping("/admin/add-category-metadata-field-values")
     public ResponseEntity<String> createCategoryMetadataFieldValues(@Valid @RequestBody CategoryMetadataFieldValuesDto createCategoryMetadataFieldValues) {
         adminService.addCategoryMetadataFieldValues(createCategoryMetadataFieldValues);
         return new ResponseEntity<>("Added Successfully", HttpStatus.OK);
     }
 
-    @PutMapping("update-category-metadata-field-values")
+    @PutMapping("/admin/update-category-metadata-field-values")
     public ResponseEntity<String> updateCategoryMetadataFieldValues(@Valid @RequestBody CategoryMetadataFieldValuesDto createCategoryMetadataFieldValues) {
         adminService.updateCategoryMetadataFieldValues(createCategoryMetadataFieldValues);
         return new ResponseEntity<>("Updated Successfully", HttpStatus.OK);

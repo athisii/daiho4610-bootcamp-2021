@@ -59,20 +59,21 @@ public class AdminService {
             ParentCategory parentCategory = new ParentCategory(categoryDto.getName());
             parentCategoryRepository.save(parentCategory);
             return parentCategory.getId();
-        } else {
-            Optional<ParentCategory> parentCategoryOption = parentCategoryRepository.findById(categoryDto.getCategoryParentId());
-            Category category = new Category(categoryDto.getName());
-
-            parentCategoryOption.ifPresentOrElse(parentCategory -> {
-                category.setParentCategory(parentCategory);
-                parentCategory.getCategories().add(category);
-                categoryRepository.save(category);
-                parentCategoryRepository.save(parentCategory);
-            }, () -> {
-                throw new CategoryExistException("No ParentCategory found for id: " + categoryDto.getCategoryParentId());
-            });
-            return category.getId();
         }
+        //Else
+        Optional<ParentCategory> parentCategoryOption = parentCategoryRepository.findById(categoryDto.getCategoryParentId());
+        Category category = new Category(categoryDto.getName());
+
+        parentCategoryOption.ifPresentOrElse(parentCategory -> {
+            category.setParentCategory(parentCategory);
+            parentCategory.getCategories().add(category);
+            categoryRepository.save(category);
+            parentCategoryRepository.save(parentCategory);
+        }, () -> {
+            throw new CategoryExistException("No ParentCategory found for id: " + categoryDto.getCategoryParentId());
+        });
+        return category.getId();
+
     }
 
     private boolean checkIfMetadataFieldNameExists(String name) {
@@ -83,14 +84,10 @@ public class AdminService {
         return categoryRepository.findByName(name) != null || parentCategoryRepository.findByName(name) != null;
     }
 
-    public Category getCategoryById(Long categoryId) {
-        Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
+    public List<Category> getCategoryById(Long categoryId) {
+        Optional<ParentCategory> categoryOptional = parentCategoryRepository.findById(categoryId);
         categoryOptional.orElseThrow(() -> new CategoryExistException("Not found for category with id: " + categoryId));
-        return categoryOptional.get();
-    }
-
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+        return categoryOptional.get().getCategories();
     }
 
     public void updateCategory(UpdateCategoryDto updateCategoryDto) {

@@ -3,6 +3,7 @@ package com.tothenew.resources;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.tothenew.entities.product.Category;
 import com.tothenew.entities.user.Address;
 import com.tothenew.objects.*;
 import com.tothenew.services.user.CustomerService;
@@ -83,7 +84,6 @@ public class CustomerResource {
         return new ResponseEntity<>("Password updated successfully!", HttpStatus.OK);
     }
 
-
     @GetMapping("/customer/profile")
     public MappingJacksonValue profile(Principal user) {
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.viewProfile(user.getName()));
@@ -92,9 +92,31 @@ public class CustomerResource {
         return mappingJacksonValue;
     }
 
-
     private FilterProvider filter(SimpleBeanPropertyFilter filter) {
         return new SimpleFilterProvider().addFilter("userFilter", filter);
+    }
+
+    @GetMapping("/customer/parent-category")
+    public List<?> retrieveParentCategories() {
+        return customerService.getAllCategories(null);
+
+    }
+
+    @GetMapping("/customer/parent-category/{parentId}")
+    public MappingJacksonValue retrieveAllCategoriesWithSameParent(@PathVariable Long parentId) {
+        List<?> categories = customerService.getAllCategories(parentId);
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(categories);
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "parentCategory");
+        mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("CategoryFilter", filter));
+        return mappingJacksonValue;
+    }
+
+    @GetMapping("/customer/category/{categoryId}")
+    public MappingJacksonValue retrieveCategory(@PathVariable Long categoryId) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.getAllCategories(categoryId));
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "categoryMetadataFieldValues");
+        mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("CategoryFilter", filter));
+        return mappingJacksonValue;
     }
 
 

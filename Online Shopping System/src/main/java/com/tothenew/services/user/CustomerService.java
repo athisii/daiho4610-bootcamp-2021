@@ -1,10 +1,13 @@
 package com.tothenew.services.user;
 
+import com.tothenew.entities.product.Category;
+import com.tothenew.entities.product.ParentCategory;
 import com.tothenew.entities.token.VerificationToken;
 import com.tothenew.entities.user.*;
 import com.tothenew.exception.*;
 import com.tothenew.objects.*;
 import com.tothenew.repos.AddressRepository;
+import com.tothenew.repos.product.ParentCategoryRepository;
 import com.tothenew.repos.user.CustomerRepository;
 import com.tothenew.repos.user.UserRepository;
 import com.tothenew.repos.VerificationTokenRepository;
@@ -32,6 +35,9 @@ public class CustomerService {
 
     @Autowired
     private AddressRepository addressRepository;
+
+    @Autowired
+    private ParentCategoryRepository parentCategoryRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -144,6 +150,20 @@ public class CustomerService {
 
     public void updateAddress(AddressDto addressDto, Long addressId) {
         userService.updateAddress(addressDto, addressId);
+    }
+
+    public List<?> getAllCategories(Long categoryId) {
+        if (categoryId == null) {
+            System.out.println("No category Id");
+            return parentCategoryRepository.findAll();
+        }
+        Optional<ParentCategory> pCategoryOpt = parentCategoryRepository.findById(categoryId);
+        pCategoryOpt.orElseThrow(() -> new CategoryExistException("Not found for category with id: " + categoryId));
+        return pCategoryOpt.get().getCategories();
+    }
+
+    public List<Category> getCategoryById(Long categoryId) {
+        return null;
     }
 }
 

@@ -1,5 +1,6 @@
 package com.tothenew.services.user;
 
+import com.tothenew.entities.product.Category;
 import com.tothenew.entities.token.VerificationToken;
 import com.tothenew.entities.user.*;
 import com.tothenew.exception.AddressNotFoundException;
@@ -10,6 +11,7 @@ import com.tothenew.objects.AddressDto;
 import com.tothenew.objects.ResetPasswordDto;
 import com.tothenew.repos.AddressRepository;
 import com.tothenew.repos.RoleRepository;
+import com.tothenew.repos.product.CategoryRepository;
 import com.tothenew.repos.user.UserRepository;
 import com.tothenew.repos.VerificationTokenRepository;
 import com.tothenew.services.EmailService;
@@ -45,6 +47,9 @@ public class UserService {
 
     @Autowired
     private VerificationTokenRepository verificationTokenRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -275,5 +280,9 @@ public class UserService {
             mm.map(addressDto, address);
             addressRepository.save(address);
         });
+    }
+
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
     }
 }
