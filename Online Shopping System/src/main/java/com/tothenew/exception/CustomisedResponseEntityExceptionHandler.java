@@ -38,6 +38,13 @@ class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHa
         return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(ProductExistException.class)
+    public final ResponseEntity<Object> handleProductExistException(ProductExistException ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
+                request.getDescription(false));
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 
     //    @ExceptionHandler(CustomAuthenticationException.class)
 //    public ResponseEntity<Object> handleAuthenticationException(CustomAuthenticationException ex, HttpServletResponse response) {

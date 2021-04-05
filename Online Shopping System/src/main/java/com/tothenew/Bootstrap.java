@@ -77,6 +77,7 @@ public class Bootstrap implements ApplicationRunner {
             seller.setLastName("Wick");
             seller.setActive(true);
             seller.setCompanyContact("7005703425");
+            seller.setCompanyName("TO THE NEW");
 
 
             Customer customer = new Customer();
@@ -115,6 +116,7 @@ public class Bootstrap implements ApplicationRunner {
 
             //Product
             ParentCategory fashion = new ParentCategory("Fashion");
+            ParentCategory electronic = new ParentCategory("Electronic");
 
             CategoryMetadataField cmf1 = new CategoryMetadataField("Size");
             CategoryMetadataField cmf2 = new CategoryMetadataField("Colour");
@@ -127,6 +129,10 @@ public class Bootstrap implements ApplicationRunner {
             shirt.setParentCategory(fashion);
             Category tshirt = new Category("Tshirt");
             tshirt.setParentCategory(fashion);
+            Category mobile = new Category("Mobile");
+            mobile.setParentCategory(electronic);
+            Category laptop = new Category("Laptop");
+            laptop.setParentCategory(electronic);
 
             CategoryMetadataFieldValues cmfv = new CategoryMetadataFieldValues();
             cmfv.setCategory(shoe);
@@ -134,7 +140,8 @@ public class Bootstrap implements ApplicationRunner {
             cmfv.setValue("7,8,9,10");
 
             fashion.getCategories().addAll(List.of(shirt, shoe, tshirt));
-            parentCategoryRepository.save(fashion);
+            electronic.getCategories().addAll(List.of(mobile, laptop));
+            parentCategoryRepository.saveAll(List.of(fashion, electronic));
             categoryMetadataFieldRepository.saveAll(List.of(cmf1, cmf2, cmf3));
             categoryMetadataFieldValuesRepository.save(cmfv);
         }

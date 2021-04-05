@@ -43,7 +43,7 @@ public class UserResource {
 //        return userService.getAllCategories();
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(userService.getAllCategories());
         SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "parentCategory", "categoryMetadataFieldValues");
-        mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("CategoryFilter", filter));
+        mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("categoryFilter", filter));
         return mappingJacksonValue;
     }
 }

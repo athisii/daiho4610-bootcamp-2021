@@ -1,6 +1,7 @@
 package com.tothenew.services.user;
 
 import com.tothenew.entities.product.Category;
+import com.tothenew.entities.product.Product;
 import com.tothenew.entities.token.VerificationToken;
 import com.tothenew.entities.user.*;
 import com.tothenew.exception.AddressNotFoundException;
@@ -29,9 +30,6 @@ import java.util.*;
 @Service
 @Transactional
 public class UserService {
-
-    @Value("${admin.email.id}")
-    String adminEmailId;
 
     @Autowired
     private UserRepository userRepository;
@@ -145,7 +143,6 @@ public class UserService {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
 
         mailMessage.setTo(registeredUser.getEmail());
-        mailMessage.setFrom(adminEmailId);
         if (UserRole.CUSTOMER == userRole) {
             mailMessage.setSubject("Complete Your Registration!");
             mailMessage.setText("To confirm your account, please click here : "
@@ -162,7 +159,6 @@ public class UserService {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
 
         mailMessage.setTo(userEmail);
-        mailMessage.setFrom(adminEmailId);
         mailMessage.setSubject("Account Activated!");
         mailMessage.setText("Your account has been activated successfully! You can now login.");
         emailService.sendEmail(mailMessage);
@@ -172,7 +168,6 @@ public class UserService {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
 
         mailMessage.setTo(userEmail);
-        mailMessage.setFrom(adminEmailId);
         mailMessage.setSubject("Account Deactivated!");
         mailMessage.setText("Your account has been deactivated!");
         emailService.sendEmail(mailMessage);
@@ -182,7 +177,7 @@ public class UserService {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
 
         mailMessage.setTo(registeredUser.getEmail());
-        mailMessage.setFrom(adminEmailId);
+//        mailMessage.setFrom(adminEmailId);
         mailMessage.setSubject("Please reset your password");
         mailMessage.setText("To reset your password, please click here : "
                 + "http://localhost:8080/reset-password/confirm?token=" + createVerificationToken(registeredUser));
@@ -192,7 +187,6 @@ public class UserService {
     public void sendResetSuccessMessage(String userEmail) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(userEmail);
-        mailMessage.setFrom(adminEmailId);
         mailMessage.setSubject("Password Reset Successfully");
         mailMessage.setText("Your password has been reset successfully!");
         emailService.sendEmail(mailMessage);
@@ -250,7 +244,6 @@ public class UserService {
     public void sendLockedMessage(String email) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(email);
-        mailMessage.setFrom(adminEmailId);
         mailMessage.setSubject("Account Locked");
         mailMessage.setText("Your account has been locked due to 3 failed attempts. It will be unlocked after 24 hours.");
         emailService.sendEmail(mailMessage);
@@ -259,7 +252,6 @@ public class UserService {
     public void sendUnLockedMessage(String email) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(email);
-        mailMessage.setFrom(adminEmailId);
         mailMessage.setSubject("Account Unlocked");
         mailMessage.setText("Your account has been unlocked. Please try to login again.");
         emailService.sendEmail(mailMessage);
@@ -284,5 +276,32 @@ public class UserService {
 
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
+    }
+
+    public void sendProductActivationMessage(Product product) {
+
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+
+        mailMessage.setTo("daiho.ekhe@tothenew.com");
+        mailMessage.setSubject("Product Activation");
+        mailMessage.setText("A new product has been created! "
+                + product +
+                "\n To activate the product, please click here: http://localhost:8080/admin/activate-product/" + product.getId());
+        emailService.sendEmail(mailMessage);
+    }
+
+    public void sendProductActivatedMessage(String name, String email) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(email);
+        mailMessage.setSubject("Product Activated");
+        mailMessage.setText("Your product: " + name + ", has been activated successfully!");
+        emailService.sendEmail(mailMessage);
+    }
+    public void sendProductDeactivatedMessage(String name, String email) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(email);
+        mailMessage.setSubject("Product Deactivated");
+        mailMessage.setText("Your product: " + name + ", has been deactivated!");
+        emailService.sendEmail(mailMessage);
     }
 }

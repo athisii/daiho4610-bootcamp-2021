@@ -1,26 +1,21 @@
 package com.tothenew.services.user;
 
-import com.tothenew.entities.product.Category;
-import com.tothenew.entities.product.CategoryMetadataField;
-import com.tothenew.entities.product.CategoryMetadataFieldValues;
-import com.tothenew.entities.product.ParentCategory;
+import com.tothenew.entities.product.*;
 import com.tothenew.exception.CategoryExistException;
 import com.tothenew.exception.CategoryMetadataFieldException;
+import com.tothenew.exception.ProductExistException;
 import com.tothenew.objects.CategoryMetadataFieldDto;
 import com.tothenew.objects.CreateCategoryDto;
 import com.tothenew.objects.UpdateCategoryDto;
 import com.tothenew.objects.categorymetadata.CategoryMetadataFieldValuesDto;
-import com.tothenew.objects.categorymetadata.MetadataFieldId;
-import com.tothenew.objects.categorymetadata.MetadataFieldValue;
-import com.tothenew.repos.product.CategoryMetadataFieldRepository;
-import com.tothenew.repos.product.CategoryMetadataFieldValuesRepository;
-import com.tothenew.repos.product.CategoryRepository;
-import com.tothenew.repos.product.ParentCategoryRepository;
+import com.tothenew.objects.categorymetadata.MetadataFieldIdValue;
+import com.tothenew.repos.product.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +30,11 @@ public class AdminService {
     private CategoryRepository categoryRepository;
     @Autowired
     private CategoryMetadataFieldValuesRepository categoryMetadataFieldValuesRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private UserService userService;
 
 
     public Long addMetadataField(CategoryMetadataFieldDto cmfd) {
@@ -107,39 +107,29 @@ public class AdminService {
         Long categoryId = cmfvd.getCategoryId();
 
         if (checkIfCategoryIdExists(categoryId)) {
-            List<MetadataFieldValue> values = new ArrayList<>(cmfvd.getValues());
-            List<MetadataFieldId> mfIds = new ArrayList<>(cmfvd.getMetadataFieldIds());
-
-            int mfIds_size = mfIds.size();
-
-            if (values.size() != mfIds_size) {
-                throw new CategoryMetadataFieldException("Number of metadataFieldIds and values should be equal and unique.");
-            }
-            mfIds.forEach(mfId -> {
-                if (checkIfMetadataFieldIdExists(mfId.getId())) {
-                    throw new CategoryMetadataFieldException("Not found Category Metadata Field with id: " + mfId.getId());
+            LinkedHashSet<MetadataFieldIdValue> mfIdvs = cmfvd.getMetadataFieldIdValues();
+            mfIdvs.forEach(mfIdv -> {
+                if (checkIfMetadataFieldIdExists(mfIdv.getMetadataFieldId())) {
+                    throw new CategoryMetadataFieldException("Not found Category Metadata Field with id: " + mfIdv.getMetadataFieldId());
                 }
-            });
-            mfIds.forEach(mfId -> {
-                if (checkIfCategoryMetadataFieldKeyExists(cmfvd.getCategoryId(), mfId.getId())) {
+                if (checkIfCategoryMetadataFieldKeyExists(cmfvd.getCategoryId(), mfIdv.getMetadataFieldId())) {
                     throw new CategoryMetadataFieldException("Same CategoryMetadataFieldKey Already Exists");
                 }
             });
-
             Category category = categoryRepository.findById(categoryId).get();
             List<CategoryMetadataFieldValues> cmfvs = new ArrayList<>();
 
-            for (int i = 0; i < mfIds_size; i++) {
+            mfIdvs.forEach(mfIdv -> {
                 CategoryMetadataFieldValues cmfv = new CategoryMetadataFieldValues();
-                CategoryMetadataField cmf = categoryMetadataFieldRepository.findById(mfIds.get(i).getId()).get();
+                CategoryMetadataField cmf = categoryMetadataFieldRepository.findById(mfIdv.getMetadataFieldId()).get();
                 cmfv.setCategory(category);
                 cmfv.setCategoryMetadataField(cmf);
-                cmfv.setValue(values.get(i).getValue());
+                cmfv.setValue(mfIdv.getValue());
                 cmfvs.add(cmfv);
-            }
+            });
             category.getCategoryMetadataFieldValues().addAll(cmfvs);
             categoryMetadataFieldValuesRepository.saveAll(cmfvs);
-            categoryRepository.save(category);
+//            categoryRepository.save(category);
             return;
 
         }
@@ -165,36 +155,63 @@ public class AdminService {
         Long categoryId = cmfvd.getCategoryId();
 
         if (checkIfCategoryIdExists(categoryId)) {
-            List<MetadataFieldValue> values = new ArrayList<>(cmfvd.getValues());
-            List<MetadataFieldId> mfIds = new ArrayList<>(cmfvd.getMetadataFieldIds());
+            LinkedHashSet<MetadataFieldIdValue> mfIdVs = cmfvd.getMetadataFieldIdValues();
 
-            int mfIds_size = mfIds.size();
-
-            if (values.size() != mfIds_size) {
-                throw new CategoryMetadataFieldException("Number of metadataFieldIds and values should be equal and unique.");
-            }
-            mfIds.forEach(mfId -> {
-                if (checkIfMetadataFieldIdExists(mfId.getId())) {
-                    throw new CategoryMetadataFieldException("Not found for Category Metadata Field with id: " + mfId.getId());
+            mfIdVs.forEach(mfIdv -> {
+                if (checkIfMetadataFieldIdExists(mfIdv.getMetadataFieldId())) {
+                    throw new CategoryMetadataFieldException("Not found Category Metadata Field with id: " + mfIdv.getMetadataFieldId());
+                }
+                if (!checkIfCategoryMetadataFieldKeyExists(cmfvd.getCategoryId(), mfIdv.getMetadataFieldId())) {
+                    throw new CategoryMetadataFieldException("Not found for Category Id: " + categoryId + " associated with MetadataField Id: " + mfIdv.getMetadataFieldId());
                 }
             });
-            mfIds.forEach(mfId -> {
-                if (!checkIfCategoryMetadataFieldKeyExists(cmfvd.getCategoryId(), mfId.getId())) {
-                    throw new CategoryMetadataFieldException("Not found for Category Id: " + categoryId + " associated with Metadata Field Id: " + mfId.getId());
-                }
-            });
-
             List<CategoryMetadataFieldValues> cmfvs = new ArrayList<>();
-
-            for (int i = 0; i < mfIds_size; i++) {
-                CategoryMetadataFieldValues cmfv = categoryMetadataFieldValuesRepository.findByKey(categoryId, mfIds.get(i).getId());
-                cmfv.setValue(values.get(i).getValue());
+            mfIdVs.forEach(mfIdV -> {
+                CategoryMetadataFieldValues cmfv = categoryMetadataFieldValuesRepository.findByKey(categoryId, mfIdV.getMetadataFieldId());
+                cmfv.setValue(mfIdV.getValue());
                 cmfvs.add(cmfv);
-            }
+            });
             categoryMetadataFieldValuesRepository.saveAll(cmfvs);
             return;
+
         }
         throw new CategoryExistException("Not Found for category with id: " + categoryId);
     }
 
+    public void activateProduct(Long productId) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        productOptional.orElseThrow(() -> new ProductExistException("Not found for product with id: " + productId));
+        productOptional.ifPresent(product -> {
+            if (product.isActive()) {
+                throw new ProductExistException("Product already activated");
+            }
+            product.setActive(true);
+            productRepository.save(product);
+            userService.sendProductActivatedMessage(product.getName(), product.getSeller().getEmail());
+        });
+
+    }
+
+    public void deactivateProduct(Long productId) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        productOptional.orElseThrow(() -> new ProductExistException("Not found for product with id: " + productId));
+        productOptional.ifPresent(product -> {
+            if (!product.isActive()) {
+                throw new ProductExistException("Product already deactivated");
+            }
+            product.setActive(false);
+            productRepository.save(product);
+            userService.sendProductDeactivatedMessage(product.getName(), product.getSeller().getEmail());
+        });
+    }
+
+    public Product getProductById(Long productId) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        productOptional.orElseThrow(() -> new ProductExistException("Not found for product with id: " + productId));
+        return productOptional.get();
+    }
+
+    public List<Product> getAllProducts() {
+      return  productRepository.findAll();
+    }
 }

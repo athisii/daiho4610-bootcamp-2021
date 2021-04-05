@@ -4,8 +4,8 @@ package com.tothenew.resources;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.tothenew.entities.product.Category;
 import com.tothenew.entities.product.CategoryMetadataField;
+import com.tothenew.entities.product.Product;
 import com.tothenew.objects.CreateCategoryDto;
 import com.tothenew.objects.CategoryMetadataFieldDto;
 import com.tothenew.objects.categorymetadata.CategoryMetadataFieldValuesDto;
@@ -81,29 +81,59 @@ public class AdminResource {
     }
 
     @GetMapping("/admin/category/{categoryId}")
-    public MappingJacksonValue viewCategory(@PathVariable Long categoryId) {
+    public MappingJacksonValue retrieveCategory(@PathVariable Long categoryId) {
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getCategoryById(categoryId));
         SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "parentCategory", "categoryMetadataFieldValues");
-        mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("CategoryFilter", filter));
+        mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("categoryFilter", filter));
         return mappingJacksonValue;
     }
 
     @PutMapping("/admin/update-category")
     public ResponseEntity<String> updateCategory(@Valid @RequestBody UpdateCategoryDto updateCategoryDto) {
         adminService.updateCategory(updateCategoryDto);
-        return new ResponseEntity<>("Updated Successfully", HttpStatus.OK);
+        return new ResponseEntity<>("Updated Successfully!", HttpStatus.OK);
     }
 
     @PostMapping("/admin/add-category-metadata-field-values")
     public ResponseEntity<String> createCategoryMetadataFieldValues(@Valid @RequestBody CategoryMetadataFieldValuesDto createCategoryMetadataFieldValues) {
         adminService.addCategoryMetadataFieldValues(createCategoryMetadataFieldValues);
-        return new ResponseEntity<>("Added Successfully", HttpStatus.OK);
+        return new ResponseEntity<>("Added Successfully!", HttpStatus.OK);
     }
 
     @PutMapping("/admin/update-category-metadata-field-values")
     public ResponseEntity<String> updateCategoryMetadataFieldValues(@Valid @RequestBody CategoryMetadataFieldValuesDto createCategoryMetadataFieldValues) {
         adminService.updateCategoryMetadataFieldValues(createCategoryMetadataFieldValues);
-        return new ResponseEntity<>("Updated Successfully", HttpStatus.OK);
+        return new ResponseEntity<>("Updated Successfully!", HttpStatus.OK);
+    }
+
+    @PutMapping("/admin/activate-product/{productId}")
+    public ResponseEntity<String> activateProduct(@PathVariable Long productId) {
+        adminService.activateProduct(productId);
+        return new ResponseEntity<>("Product activated Successfully!", HttpStatus.OK);
+    }
+
+    @PutMapping("/admin/deactivate-product/{productId}")
+    public ResponseEntity<String> deactivateProduct(@PathVariable Long productId) {
+        adminService.deactivateProduct(productId);
+        return new ResponseEntity<>("Product deactivated Successfully!", HttpStatus.OK);
+    }
+
+    @GetMapping("/admin/product/{productId}")
+    public MappingJacksonValue retrieveProduct(@PathVariable Long productId) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getProductById(productId));
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "brand", "name", "active", "returnable", "description", "cancelable", "category", "seller");
+        SimpleFilterProvider categoryFilter = new SimpleFilterProvider().addFilter("productFilter", filter).addFilter("categoryFilter", filter).addFilter("userFilter", filter);
+        mappingJacksonValue.setFilters(categoryFilter);
+        return mappingJacksonValue;
+    }
+
+    @GetMapping("/admin/product")
+    public MappingJacksonValue retrieveAllProducts() {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getAllProducts());
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "brand", "name", "active", "returnable", "description", "cancelable", "category", "seller");
+        SimpleFilterProvider categoryFilter = new SimpleFilterProvider().addFilter("productFilter", filter).addFilter("categoryFilter", filter).addFilter("userFilter", filter);
+        mappingJacksonValue.setFilters(categoryFilter);
+        return mappingJacksonValue;
     }
 
 

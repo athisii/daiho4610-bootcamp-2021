@@ -107,7 +107,7 @@ public class CustomerResource {
         List<?> categories = customerService.getAllCategories(parentId);
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(categories);
         SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "parentCategory");
-        mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("CategoryFilter", filter));
+        mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("categoryFilter", filter));
         return mappingJacksonValue;
     }
 
@@ -115,7 +115,25 @@ public class CustomerResource {
     public MappingJacksonValue retrieveCategory(@PathVariable Long categoryId) {
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.getAllCategories(categoryId));
         SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "categoryMetadataFieldValues");
-        mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("CategoryFilter", filter));
+        mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("categoryFilter", filter));
+        return mappingJacksonValue;
+    }
+
+    @GetMapping("/customer/product/{productId}")
+    public MappingJacksonValue retrieveProduct(@PathVariable Long productId) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.getProduct(productId));
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "brand", "active", "returnable", "description", "cancelable", "category");
+        SimpleFilterProvider categoryFilter = new SimpleFilterProvider().addFilter("productFilter", filter).addFilter("categoryFilter", filter);
+        mappingJacksonValue.setFilters(categoryFilter);
+        return mappingJacksonValue;
+    }
+
+    @GetMapping("/customer/category-product/{categoryId}")
+    public MappingJacksonValue retrieveAllProducts(@PathVariable Long categoryId) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.getAllProducts(categoryId));
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "brand", "active", "returnable", "description", "cancelable", "category");
+        SimpleFilterProvider categoryFilter = new SimpleFilterProvider().addFilter("productFilter", filter).addFilter("categoryFilter", filter);
+        mappingJacksonValue.setFilters(categoryFilter);
         return mappingJacksonValue;
     }
 

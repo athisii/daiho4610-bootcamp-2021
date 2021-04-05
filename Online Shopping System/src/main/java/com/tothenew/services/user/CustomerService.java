@@ -2,12 +2,15 @@ package com.tothenew.services.user;
 
 import com.tothenew.entities.product.Category;
 import com.tothenew.entities.product.ParentCategory;
+import com.tothenew.entities.product.Product;
 import com.tothenew.entities.token.VerificationToken;
 import com.tothenew.entities.user.*;
 import com.tothenew.exception.*;
 import com.tothenew.objects.*;
 import com.tothenew.repos.AddressRepository;
+import com.tothenew.repos.product.CategoryRepository;
 import com.tothenew.repos.product.ParentCategoryRepository;
+import com.tothenew.repos.product.ProductRepository;
 import com.tothenew.repos.user.CustomerRepository;
 import com.tothenew.repos.user.UserRepository;
 import com.tothenew.repos.VerificationTokenRepository;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -38,6 +42,12 @@ public class CustomerService {
 
     @Autowired
     private ParentCategoryRepository parentCategoryRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -154,7 +164,6 @@ public class CustomerService {
 
     public List<?> getAllCategories(Long categoryId) {
         if (categoryId == null) {
-            System.out.println("No category Id");
             return parentCategoryRepository.findAll();
         }
         Optional<ParentCategory> pCategoryOpt = parentCategoryRepository.findById(categoryId);
@@ -162,8 +171,37 @@ public class CustomerService {
         return pCategoryOpt.get().getCategories();
     }
 
-    public List<Category> getCategoryById(Long categoryId) {
-        return null;
+    public Product getProduct(Long productId) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        productOptional.ifPresentOrElse(product -> {
+            if (!product.isActive()) {
+                throw new ProductExistException("Not found for product with id: " + productId);
+            }
+        }, () -> {
+            throw new ProductExistException("Not found for product with id: " + productId);
+        });
+        return productOptional.get();
+    }
+
+    public List<Product> getAllProducts(Long categoryId) {
+
+        Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
+        if (categoryOptional.isPresent()) {
+            return categoryOptional.get().getProducts()
+                    .stream()
+                    .filter(Product::isActive)
+                    .collect(Collectors.toList());
+        } else {
+            Optional<ParentCategory> parentCategoryOptional = parentCategoryRepository.findById(categoryId);
+            parentCategoryOptional.orElseThrow(() -> new CategoryExistException("Not found for category with id: " + categoryId));
+            return parentCategoryOptional.get()
+                    .getCategories()
+                    .stream()
+                    .map(Category::getProducts)
+                    .flatMap(List::stream)
+                    .filter(Product::isActive)
+                    .collect(Collectors.toList());
+        }
     }
 }
 

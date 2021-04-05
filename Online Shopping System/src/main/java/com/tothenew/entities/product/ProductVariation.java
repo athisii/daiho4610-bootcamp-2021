@@ -23,7 +23,7 @@ public class ProductVariation {
     private int quantityAvailable;
     private int price;
     private String primaryImageName;
-    private Boolean isActive;
+    private boolean isActive = true;
 
     @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "id")
