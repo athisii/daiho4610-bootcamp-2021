@@ -79,8 +79,8 @@ public class SellerResource {
     }
 
     @PostMapping("/seller/add-product-variation")
-    public ResponseEntity<String> addProductVariation(@Valid @RequestBody CreateProductVariationDto createProductVariationDto, Principal principal) {
-        sellerService.addProductVariation(createProductVariationDto, principal.getName());
+    public ResponseEntity<String> addProductVariation(@Valid @RequestBody CreateProductVariationDto createProductVariationDto) {
+        sellerService.addProductVariation(createProductVariationDto);
         return new ResponseEntity<>("Product Variation added successfully!", HttpStatus.OK);
     }
 

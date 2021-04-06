@@ -1,15 +1,9 @@
 package com.tothenew;
 
-import com.tothenew.entities.product.Category;
-import com.tothenew.entities.product.CategoryMetadataField;
-import com.tothenew.entities.product.CategoryMetadataFieldValues;
-import com.tothenew.entities.product.ParentCategory;
+import com.tothenew.entities.product.*;
 import com.tothenew.entities.user.*;
 import com.tothenew.repos.RoleRepository;
-import com.tothenew.repos.product.CategoryMetadataFieldRepository;
-import com.tothenew.repos.product.CategoryMetadataFieldValuesRepository;
-import com.tothenew.repos.product.CategoryRepository;
-import com.tothenew.repos.product.ParentCategoryRepository;
+import com.tothenew.repos.product.*;
 import com.tothenew.repos.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -37,9 +31,10 @@ public class Bootstrap implements ApplicationRunner {
     private ParentCategoryRepository parentCategoryRepository;
 
     @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
     private CategoryMetadataFieldValuesRepository categoryMetadataFieldValuesRepository;
+
+    @Autowired
+    private ProductVariationRepository productVariationRepository;
 
 
     @Transactional
@@ -134,16 +129,22 @@ public class Bootstrap implements ApplicationRunner {
             Category laptop = new Category("Laptop");
             laptop.setParentCategory(electronic);
 
-            CategoryMetadataFieldValues cmfv = new CategoryMetadataFieldValues();
-            cmfv.setCategory(shoe);
-            cmfv.setCategoryMetadataField(cmf1);
-            cmfv.setValue("7,8,9,10");
+            CategoryMetadataFieldValues cmfv1 = new CategoryMetadataFieldValues();
+            cmfv1.setCategory(shoe);
+            cmfv1.setCategoryMetadataField(cmf1);
+            cmfv1.setValue("7,8,9,10");
+            CategoryMetadataFieldValues cmfv2 = new CategoryMetadataFieldValues();
+            cmfv2.setCategory(shoe);
+            cmfv2.setCategoryMetadataField(cmf2);
+            cmfv2.setValue("Black,Brown,Red");
 
             fashion.getCategories().addAll(List.of(shirt, shoe, tshirt));
             electronic.getCategories().addAll(List.of(mobile, laptop));
             parentCategoryRepository.saveAll(List.of(fashion, electronic));
             categoryMetadataFieldRepository.saveAll(List.of(cmf1, cmf2, cmf3));
-            categoryMetadataFieldValuesRepository.save(cmfv);
+            categoryMetadataFieldValuesRepository.saveAll(List.of(cmfv1, cmfv2));
+
+
         }
     }
 }

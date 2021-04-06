@@ -1,7 +1,6 @@
 package com.tothenew.services.user;
 
-import com.tothenew.entities.product.Category;
-import com.tothenew.entities.product.Product;
+import com.tothenew.entities.product.*;
 import com.tothenew.entities.user.Role;
 import com.tothenew.entities.user.Seller;
 import com.tothenew.entities.user.User;
@@ -10,9 +9,12 @@ import com.tothenew.exception.*;
 import com.tothenew.objects.*;
 import com.tothenew.objects.product.CreateProductDto;
 import com.tothenew.objects.product.CreateProductVariationDto;
+import com.tothenew.objects.product.ProductVariationMetadataFieldValueDto;
 import com.tothenew.objects.product.UpdateProductDto;
+import com.tothenew.repos.product.CategoryMetadataFieldRepository;
 import com.tothenew.repos.product.CategoryRepository;
 import com.tothenew.repos.product.ProductRepository;
+import com.tothenew.repos.product.ProductVariationRepository;
 import com.tothenew.repos.user.SellerRepository;
 import com.tothenew.repos.user.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -21,9 +23,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -40,6 +41,12 @@ public class SellerService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private CategoryMetadataFieldRepository categoryMetadataFieldRepository;
+
+    @Autowired
+    private ProductVariationRepository productVariationRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -132,9 +139,59 @@ public class SellerService {
         return productRepository.findByNameSellerIdBrandCategoryId(productName, sellerId, brand, categoryId) != null;
     }
 
-    public void addProductVariation(CreateProductVariationDto cpvd, String email) {
-        System.out.println(cpvd);
+    public void addProductVariation(CreateProductVariationDto createProductVariationDto) {
+        Long productId = createProductVariationDto.getProductId();
+        Optional<Product> productOptional = productRepository.findById(productId);
+        productOptional.orElseThrow(() -> new ProductExistException("Not found for product with id:" + productId));
+        Product product = productOptional.get();
+        if (!product.isActive()) {
+            throw new ProductExistException("Not found for product with id: " + productId);
+        }
+        Category category = product.getCategory();
+        Long categoryId = category.getId();
+        List<Long> categoryMFIds = category.getCategoryMetadataFieldValues()
+                .stream()
+                .map(cmfv -> cmfv.getCategoryMetadataField().getId())
+                .collect(Collectors.toList());
+        List<CategoryMetadataFieldValues> categoryMetadataFieldValues = category.getCategoryMetadataFieldValues();
 
+//        Check if MetadataField ids from requestDto exists in CategoryMetadataFieldValues of product's category id.
+        List<ProductVariationMetadataFieldValueDto> metadataFieldIdValues = createProductVariationDto.getMetadata();
+        for (ProductVariationMetadataFieldValueDto mv : metadataFieldIdValues) {
+            Long metadataFieldId = mv.getMetadataFieldId();
+            if (!categoryMFIds.contains(metadataFieldId)) {
+                throw new CategoryMetadataFieldException("Not found for Category Metadata Field with id: " + metadataFieldId);
+            }
+            CategoryMetadataFieldValues cMFV = categoryMetadataFieldValues.stream()
+                    .filter(cmfv -> cmfv.getCategory().getId().equals(categoryId) && cmfv.getCategoryMetadataField().getId().equals(metadataFieldId))
+                    .findFirst().get();
+            String requestValue = mv.getValue();
+            Optional<String> result = Arrays.stream(cMFV.getValue().split(",")).filter(value -> value.equals(requestValue)).findFirst();
+            if (result.isEmpty()) {
+                throw new CategoryMetadataFieldException("Metadata Field Value should be within the possible values!");
+            }
+        }
+
+        ProductVariation productVariation = new ProductVariation();
+        productVariation.setPrice(createProductVariationDto.getPrice());
+        productVariation.setQuantityAvailable(createProductVariationDto.getQuantityAvailable());
+        productVariation.setProduct(product);
+        productVariation.setPrimaryImageName(createProductVariationDto.getPrimaryImageName());
+        StringBuilder sb = new StringBuilder("{");
+        for (var mv : metadataFieldIdValues) {
+            CategoryMetadataField categoryMetadataField = categoryMetadataFieldRepository.findById(mv.getMetadataFieldId()).get();
+            sb.append("\"")
+                    .append(categoryMetadataField.getName())
+                    .append("\":\"")
+                    .append(mv.getValue())
+                    .append("\",");
+        }
+        sb.setCharAt(sb.length() - 1, '}');
+        String metadata = sb.toString();
+        productVariation.setMetadata(metadata);
+        productVariationRepository.save(productVariation);
+        System.out.println(productVariation);
+        
     }
 
 

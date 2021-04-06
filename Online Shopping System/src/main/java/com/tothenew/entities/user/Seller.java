@@ -1,8 +1,9 @@
 package com.tothenew.entities.user;
 
 import com.tothenew.entities.product.Product;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -13,7 +14,8 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
+@Getter
+@Setter
 @PrimaryKeyJoinColumn(name = "id")
 public class Seller extends User {
     private String GST;

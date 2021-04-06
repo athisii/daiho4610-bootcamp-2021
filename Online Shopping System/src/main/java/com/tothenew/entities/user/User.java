@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.*;
@@ -14,7 +15,8 @@ import java.util.*;
 @JsonFilter("userFilter")
 @JsonInclude(value = Include.NON_EMPTY)
 @Entity
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(exclude = {"roles", "addresses"})
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User {

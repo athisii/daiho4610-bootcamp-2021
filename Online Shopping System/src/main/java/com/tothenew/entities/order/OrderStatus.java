@@ -2,14 +2,13 @@ package com.tothenew.entities.order;
 
 import com.tothenew.entities.order.orderstatusenum.FromStatus;
 import com.tothenew.entities.order.orderstatusenum.ToStatus;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderStatus {

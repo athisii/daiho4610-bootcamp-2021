@@ -1,21 +1,24 @@
 package com.tothenew.entities.product;
 
-import com.tothenew.entities.cart.Cart;
-import com.tothenew.entities.order.OrderProduct;
+import com.vladmihalcea.hibernate.type.json.JsonStringType;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Data
-@EqualsAndHashCode(exclude = {"product", "orderProduct"})
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@TypeDef(
+        name = "json",
+        typeClass = JsonStringType.class
+)
 public class ProductVariation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,15 +32,20 @@ public class ProductVariation {
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     private Product product;
 
-    @OneToOne(mappedBy = "productVariation")
-    private OrderProduct orderProduct;
-
     //Metadata(Json)
-    @OneToOne
-    @JoinColumn(name = "metadata")
-    private Category category;
+    @Type(type = "json")
+    @Column(columnDefinition = "json")
+    private String metadata;
 
-    @OneToMany(mappedBy = "productVariation", cascade = CascadeType.ALL)
-    private List<Cart> carts = new ArrayList<>();
+
+//    @OneToOne
+//    @JoinColumn(name = "metadata")
+//    private Category category;
+
+//    @OneToMany(mappedBy = "productVariation", cascade = CascadeType.ALL)
+//    private List<Cart> carts = new ArrayList<>();
+//
+//    @OneToOne(mappedBy = "productVariation")
+//    private OrderProduct orderProduct;
 
 }

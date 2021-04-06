@@ -1,15 +1,25 @@
 package com.tothenew.objects.product;
 
 import lombok.Getter;
+import lombok.Setter;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Getter
+@Setter
 public class CreateProductVariationDto {
+    @NotNull
     private Long productId;
-    private int quantityAvailable;
-    private int price;
+    @NotNull
+    private Integer quantityAvailable;
+    @NotNull
+    private Integer price;
+    @NotNull
+    @NotEmpty
     private String primaryImageName;
+    @NotNull
     List<ProductVariationMetadataFieldValueDto> metadata;
 
     @Override

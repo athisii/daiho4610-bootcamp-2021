@@ -109,7 +109,7 @@ public class AdminService {
         if (checkIfCategoryIdExists(categoryId)) {
             LinkedHashSet<MetadataFieldIdValue> mfIdvs = cmfvd.getMetadataFieldIdValues();
             mfIdvs.forEach(mfIdv -> {
-                if (checkIfMetadataFieldIdExists(mfIdv.getMetadataFieldId())) {
+                if (checkIfMetadataFieldIdIsEmpty(mfIdv.getMetadataFieldId())) {
                     throw new CategoryMetadataFieldException("Not found Category Metadata Field with id: " + mfIdv.getMetadataFieldId());
                 }
                 if (checkIfCategoryMetadataFieldKeyExists(cmfvd.getCategoryId(), mfIdv.getMetadataFieldId())) {
@@ -138,7 +138,7 @@ public class AdminService {
 
     }
 
-    private boolean checkIfMetadataFieldIdExists(Long metadataFieldId) {
+    private boolean checkIfMetadataFieldIdIsEmpty(Long metadataFieldId) {
         return categoryMetadataFieldRepository.findById(metadataFieldId).isEmpty();
     }
 
@@ -158,7 +158,7 @@ public class AdminService {
             LinkedHashSet<MetadataFieldIdValue> mfIdVs = cmfvd.getMetadataFieldIdValues();
 
             mfIdVs.forEach(mfIdv -> {
-                if (checkIfMetadataFieldIdExists(mfIdv.getMetadataFieldId())) {
+                if (checkIfMetadataFieldIdIsEmpty(mfIdv.getMetadataFieldId())) {
                     throw new CategoryMetadataFieldException("Not found Category Metadata Field with id: " + mfIdv.getMetadataFieldId());
                 }
                 if (!checkIfCategoryMetadataFieldKeyExists(cmfvd.getCategoryId(), mfIdv.getMetadataFieldId())) {
