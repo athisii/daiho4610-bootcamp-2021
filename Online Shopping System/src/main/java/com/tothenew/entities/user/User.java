@@ -17,7 +17,6 @@ import java.util.*;
 @Entity
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = {"roles", "addresses"})
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User {
 

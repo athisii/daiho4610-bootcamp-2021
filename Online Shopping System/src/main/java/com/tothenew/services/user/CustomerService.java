@@ -174,7 +174,7 @@ public class CustomerService {
     public Product getProduct(Long productId) {
         Optional<Product> productOptional = productRepository.findById(productId);
         productOptional.ifPresentOrElse(product -> {
-            if (!product.isActive()) {
+            if (!product.isActive() || product.isDeleted()) {
                 throw new ProductExistException("Not found for product with id: " + productId);
             }
         }, () -> {
@@ -202,6 +202,21 @@ public class CustomerService {
                     .filter(Product::isActive)
                     .collect(Collectors.toList());
         }
+    }
+
+    public List<Product> getSimilarProducts(Long productId) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        productOptional.ifPresentOrElse(product -> {
+            if (!product.isActive() || product.isDeleted()) {
+                throw new ProductExistException("Not found for product with id: " + productId);
+            }
+        }, () -> {
+            throw new ProductExistException("Not found for product with id: " + productId);
+        });
+        Product product = productOptional.get();
+        Category category = product.getCategory();
+        return category.getProducts();
+
     }
 }
 

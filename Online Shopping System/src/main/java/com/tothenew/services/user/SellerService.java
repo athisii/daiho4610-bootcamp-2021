@@ -7,10 +7,7 @@ import com.tothenew.entities.user.User;
 import com.tothenew.entities.user.UserRole;
 import com.tothenew.exception.*;
 import com.tothenew.objects.*;
-import com.tothenew.objects.product.CreateProductDto;
-import com.tothenew.objects.product.CreateProductVariationDto;
-import com.tothenew.objects.product.ProductVariationMetadataFieldValueDto;
-import com.tothenew.objects.product.UpdateProductDto;
+import com.tothenew.objects.product.*;
 import com.tothenew.repos.product.CategoryMetadataFieldRepository;
 import com.tothenew.repos.product.CategoryRepository;
 import com.tothenew.repos.product.ProductRepository;
@@ -23,7 +20,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -75,10 +75,7 @@ public class SellerService {
     }
 
     public void resendToken(EmailDto emailDto) throws UserNotFoundException {
-        User user = userRepository.findByEmail(emailDto.getEmail());
-        if (user == null) {
-            throw new UserNotFoundException("No such email found!");
-        }
+        User user = userService.findUserByEmail(emailDto.getEmail());
         if (user.isActive()) {
             userService.sendResetPasswordMessage(user);
         } else {
@@ -113,7 +110,7 @@ public class SellerService {
     public void addProduct(CreateProductDto createProductDto, String email) {
         Long categoryId = createProductDto.getCategory();
         Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
-        categoryOptional.orElseThrow(() -> new CategoryExistException("Not found category with id:" + categoryId));
+        categoryOptional.orElseThrow(() -> new CategoryExistException("No category found for id:" + categoryId));
 
         categoryOptional.ifPresent(category -> {
 
@@ -139,28 +136,148 @@ public class SellerService {
         return productRepository.findByNameSellerIdBrandCategoryId(productName, sellerId, brand, categoryId) != null;
     }
 
-    public void addProductVariation(CreateProductVariationDto createProductVariationDto) {
-        Long productId = createProductVariationDto.getProductId();
+
+    public List<Product> getAllProducts(String email) {
+        Seller seller = (Seller) userService.findUserByEmail(email);
+        return seller.getProducts();
+    }
+
+    public Product getProductById(String email, Long productId) {
+        Seller seller = (Seller) userService.findUserByEmail(email);
         Optional<Product> productOptional = productRepository.findById(productId);
-        productOptional.orElseThrow(() -> new ProductExistException("Not found for product with id:" + productId));
+        productOptional.orElseThrow(() -> new ProductExistException("No product found for id: " + productId));
         Product product = productOptional.get();
-        if (!product.isActive()) {
-            throw new ProductExistException("Not found for product with id: " + productId);
+        if (product.getSeller().getId().equals(seller.getId())) {
+            return product;
+        }
+        throw new ProductExistException("No product found for id: " + productId);
+    }
+
+    public void deleteProduct(String email, Long productId) {
+        Seller seller = (Seller) userService.findUserByEmail(email);
+        Optional<Product> productOptional = productRepository.findById(productId);
+        productOptional.orElseThrow(() -> new ProductExistException("No product found for id: " + productId));
+        Product product = productOptional.get();
+        if (product.getSeller().getId().equals(seller.getId())) {
+            product.setDeleted(true);
+            productRepository.save(product);
+        }
+        throw new ProductExistException("No product found for id: " + productId);
+
+    }
+
+
+    public void updateProduct(UpdateProductDto updateProductDto, String email) {
+        Seller seller = (Seller) userService.findUserByEmail(email);
+        Long productId = updateProductDto.getProductId();
+
+        Optional<Product> productOptional = productRepository.findById(productId);
+        productOptional.orElseThrow(() -> new ProductExistException("No product found for id: " + productId));
+        Product product = productOptional.get();
+        if (product.getSeller().getId().equals(seller.getId())) {
+            String oldName = product.getName();
+            String brand = product.getBrand();
+            Long categoryId = product.getCategory().getId();
+            String productName = updateProductDto.getName();
+
+            if (productName != null && !productName.isBlank()) {
+                if (checkIfProductExist(productName, seller.getId(), brand, categoryId)) {
+                    throw new ProductExistException("Same product exists");
+                }
+                ModelMapper mm = new ModelMapper();
+                mm.map(updateProductDto, product);
+                productRepository.save(product);
+                return;
+            }
+            ModelMapper mm = new ModelMapper();
+            mm.map(updateProductDto, product);
+            product.setName(oldName);
+            productRepository.save(product);
+        }
+        throw new ProductExistException("No product found for id: " + productId);
+
+    }
+
+    public ProductVariation getProductVariationById(String email, Long productVariationId) {
+        Seller seller = (Seller) userService.findUserByEmail(email);
+        Optional<ProductVariation> pvOptional = productVariationRepository.findById(productVariationId);
+        pvOptional.orElseThrow(() -> new ProductExistException("No product variation found for id: " + productVariationId));
+        ProductVariation productVariation = pvOptional.get();
+        if (productVariation.getProduct().getSeller().getId().equals(seller.getId()) && !productVariation.getProduct().isDeleted()) {
+            return productVariation;
+        }
+        throw new ProductExistException("No product variation found for id: " + productVariationId);
+    }
+
+    public List<ProductVariation> getAllProductVariationForProductById(String email, Long productId) {
+        Seller seller = (Seller) userService.findUserByEmail(email);
+        Optional<Product> productOptional = productRepository.findById(productId);
+        productOptional.orElseThrow(() -> new ProductExistException("No product found for id: " + productId));
+        Product product = productOptional.get();
+        if (product.getSeller().getId().equals(seller.getId()) && !product.isDeleted()) {
+            return product.getProductVariations();
+        }
+        throw new ProductExistException("No product found for id: " + productId);
+    }
+
+    public void addProductVariation(CreateProductVariationDto createProductVariationDto, String email) {
+        Long productId = createProductVariationDto.getProductId();
+        Seller seller = (Seller) userService.findUserByEmail(email);
+        Optional<Product> productOptional = productRepository.findById(productId);
+        productOptional.orElseThrow(() -> new ProductExistException("No product found for id: " + productId));
+        Product product = productOptional.get();
+
+        if (!product.getSeller().getId().equals(seller.getId()) || !product.isActive() || product.isDeleted()) {
+            throw new ProductExistException("No product found for id: " + productId);
         }
         Category category = product.getCategory();
+        List<ProductVariationMetadataFieldValueDto> metadataFieldIdValues = createProductVariationDto.getMetadata();
+        validate(category, metadataFieldIdValues); //throws exceptions
+        ProductVariation productVariation = new ProductVariation();
+        productVariation.setPrice(createProductVariationDto.getPrice());
+        productVariation.setQuantityAvailable(createProductVariationDto.getQuantityAvailable());
+        productVariation.setProduct(product);
+        productVariation.setPrimaryImageName(createProductVariationDto.getPrimaryImageName());
+        String metadata = buildMetadata(metadataFieldIdValues);
+        productVariation.setMetadata(metadata);
+        productVariationRepository.save(productVariation);
+
+    }
+
+
+    public void updateProductVariation(UpdateProductVariationDto updateProductVariationDto, String email) {
+        Long productVariationId = updateProductVariationDto.getProductVariationId();
+        Seller seller = (Seller) userService.findUserByEmail(email);
+        Optional<ProductVariation> productVariationOptional = productVariationRepository.findById(productVariationId);
+        productVariationOptional.orElseThrow(() -> new ProductExistException("No product variation found for id: " + productVariationId));
+        ProductVariation productVariation = productVariationOptional.get();
+        Product product = productVariation.getProduct();
+
+        if (!product.getSeller().getId().equals(seller.getId()) || !product.isActive() || product.isDeleted()) {
+            throw new ProductExistException("No product variation found for id: " + productVariationId);
+        }
+
+        Category category = product.getCategory();
+        List<ProductVariationMetadataFieldValueDto> metadataFieldIdValues = updateProductVariationDto.getUpdateMetadata();
+        validate(category, metadataFieldIdValues);
+        ModelMapper mm = new ModelMapper();
+        mm.map(updateProductVariationDto, productVariation);
+        String metadata = buildMetadata(metadataFieldIdValues);
+        productVariation.setMetadata(metadata);
+        productVariationRepository.save(productVariation);
+    }
+
+    private void validate(Category category, List<ProductVariationMetadataFieldValueDto> metadataFieldIdValues) {
         Long categoryId = category.getId();
         List<Long> categoryMFIds = category.getCategoryMetadataFieldValues()
                 .stream()
                 .map(cmfv -> cmfv.getCategoryMetadataField().getId())
                 .collect(Collectors.toList());
         List<CategoryMetadataFieldValues> categoryMetadataFieldValues = category.getCategoryMetadataFieldValues();
-
-//        Check if MetadataField ids from requestDto exists in CategoryMetadataFieldValues of product's category id.
-        List<ProductVariationMetadataFieldValueDto> metadataFieldIdValues = createProductVariationDto.getMetadata();
         for (ProductVariationMetadataFieldValueDto mv : metadataFieldIdValues) {
             Long metadataFieldId = mv.getMetadataFieldId();
             if (!categoryMFIds.contains(metadataFieldId)) {
-                throw new CategoryMetadataFieldException("Not found for Category Metadata Field with id: " + metadataFieldId);
+                throw new CategoryMetadataFieldException("Category Metadata Field not found with id: " + metadataFieldId);
             }
             CategoryMetadataFieldValues cMFV = categoryMetadataFieldValues.stream()
                     .filter(cmfv -> cmfv.getCategory().getId().equals(categoryId) && cmfv.getCategoryMetadataField().getId().equals(metadataFieldId))
@@ -168,15 +285,12 @@ public class SellerService {
             String requestValue = mv.getValue();
             Optional<String> result = Arrays.stream(cMFV.getValue().split(",")).filter(value -> value.equals(requestValue)).findFirst();
             if (result.isEmpty()) {
-                throw new CategoryMetadataFieldException("Metadata Field Value should be within the possible values!");
+                throw new CategoryMetadataFieldException("Metadata Field Value should be within the possible values! Given value: " + requestValue);
             }
         }
+    }
 
-        ProductVariation productVariation = new ProductVariation();
-        productVariation.setPrice(createProductVariationDto.getPrice());
-        productVariation.setQuantityAvailable(createProductVariationDto.getQuantityAvailable());
-        productVariation.setProduct(product);
-        productVariation.setPrimaryImageName(createProductVariationDto.getPrimaryImageName());
+    private String buildMetadata(List<ProductVariationMetadataFieldValueDto> metadataFieldIdValues) {
         StringBuilder sb = new StringBuilder("{");
         for (var mv : metadataFieldIdValues) {
             CategoryMetadataField categoryMetadataField = categoryMetadataFieldRepository.findById(mv.getMetadataFieldId()).get();
@@ -187,70 +301,6 @@ public class SellerService {
                     .append("\",");
         }
         sb.setCharAt(sb.length() - 1, '}');
-        String metadata = sb.toString();
-        productVariation.setMetadata(metadata);
-        productVariationRepository.save(productVariation);
-        System.out.println(productVariation);
-        
+        return sb.toString();
     }
-
-
-    public List<Product> getAllProducts(String email) {
-        Seller seller = (Seller) userService.findUserByEmail(email);
-        return seller.getProducts();
-    }
-
-    public Product getProductById(String email, Long productId) {
-        Seller seller = (Seller) userService.findUserByEmail(email);
-        Optional<Product> optionalProduct = seller.getProducts()
-                .stream()
-                .filter(product -> product.getId().equals(productId))
-                .findFirst();
-        optionalProduct.orElseThrow(() -> new ProductExistException("Not found for product with id: " + productId));
-        return optionalProduct.get();
-    }
-
-    public void deleteProduct(String email, Long productId) {
-        Seller seller = (Seller) userService.findUserByEmail(email);
-        boolean result = seller.getProducts().removeIf(product -> product.getId().equals(productId));
-        if (result) {
-            productRepository.deleteById(productId);
-            return;
-        }
-        throw new ProductExistException("Not found for product with id: " + productId);
-    }
-
-    public void updateProduct(UpdateProductDto updateProductDto, String email) {
-        Seller seller = (Seller) userService.findUserByEmail(email);
-        Long productId = updateProductDto.getProductId();
-        Optional<Product> optionalProduct = seller.getProducts()
-                .stream()
-                .filter(product -> product.getId().equals(productId))
-                .findFirst();
-        optionalProduct.orElseThrow(() -> new ProductExistException("Not found for product with id: " + productId));
-
-        Product product = optionalProduct.get();
-        String oldName = product.getName();
-        String brand = product.getBrand();
-        Long categoryId = product.getCategory().getId();
-        String productName = updateProductDto.getName();
-
-        if (productName != null && !productName.isBlank()) {
-            if (checkIfProductExist(productName, seller.getId(), brand, categoryId)) {
-                throw new ProductExistException("Same product exists");
-            }
-            System.out.println(updateProductDto);
-            ModelMapper mm = new ModelMapper();
-            mm.map(updateProductDto, product);
-            productRepository.save(product);
-            return;
-        }
-        System.out.println(updateProductDto);
-        ModelMapper mm = new ModelMapper();
-        mm.map(updateProductDto, product);
-        product.setName(oldName);
-        productRepository.save(product);
-
-    }
-
 }

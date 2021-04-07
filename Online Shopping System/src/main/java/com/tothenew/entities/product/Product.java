@@ -1,7 +1,8 @@
 package com.tothenew.entities.product;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.tothenew.entities.user.Seller;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,8 +17,11 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties(value = {"productVariations", "productReview"})
 @JsonFilter("productFilter")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +32,7 @@ public class Product {
     private boolean isCancelable;
     private boolean isReturnable;
     private boolean isActive;
+    private boolean isDeleted;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "seller_id")
@@ -40,8 +45,8 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductVariation> productVariations;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<ProductReview> productReview;
+//    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+//    private List<ProductReview> productReview;
 
     @Override
     public String toString() {

@@ -7,6 +7,7 @@ import com.tothenew.objects.*;
 import com.tothenew.objects.product.CreateProductDto;
 import com.tothenew.objects.product.CreateProductVariationDto;
 import com.tothenew.objects.product.UpdateProductDto;
+import com.tothenew.objects.product.UpdateProductVariationDto;
 import com.tothenew.services.user.SellerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -79,9 +80,15 @@ public class SellerResource {
     }
 
     @PostMapping("/seller/add-product-variation")
-    public ResponseEntity<String> addProductVariation(@Valid @RequestBody CreateProductVariationDto createProductVariationDto) {
-        sellerService.addProductVariation(createProductVariationDto);
+    public ResponseEntity<String> addProductVariation(@Valid @RequestBody CreateProductVariationDto createProductVariationDto, Principal principal) {
+        sellerService.addProductVariation(createProductVariationDto, principal.getName());
         return new ResponseEntity<>("Product Variation added successfully!", HttpStatus.OK);
+    }
+
+    @PutMapping("/seller/update-product-variation")
+    public ResponseEntity<String> updateProductVariation(@Valid @RequestBody UpdateProductVariationDto updateProductVariationDto, Principal principal) {
+        sellerService.updateProductVariation(updateProductVariationDto, principal.getName());
+        return new ResponseEntity<>("Product Variation updated successfully!", HttpStatus.OK);
     }
 
     @DeleteMapping("/seller/delete-product/{productId}")
@@ -105,6 +112,24 @@ public class SellerResource {
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.getAllProducts(principal.getName()));
         SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("category");
         SimpleFilterProvider categoryFilter = new SimpleFilterProvider().addFilter("categoryFilter", filter); //.addFilter("productFilter", filter)
+        mappingJacksonValue.setFilters(categoryFilter);
+        return mappingJacksonValue;
+    }
+
+    @GetMapping("/seller/product-variation/{productVariationId}")
+    public MappingJacksonValue retrieveProductVariationById(Principal principal, @PathVariable Long productVariationId) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.getProductVariationById(principal.getName(), productVariationId));
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "brand", "name", "description", "category");
+        SimpleFilterProvider categoryFilter = new SimpleFilterProvider().addFilter("productFilter", filter).addFilter("categoryFilter", filter);
+        mappingJacksonValue.setFilters(categoryFilter);
+        return mappingJacksonValue;
+    }
+
+    @GetMapping("/seller/product/product-variation/{productId}")
+    public MappingJacksonValue retrieveAllProductVariationForProductById(Principal principal, @PathVariable Long productId) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.getAllProductVariationForProductById(principal.getName(), productId));
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id");
+        SimpleFilterProvider categoryFilter = new SimpleFilterProvider().addFilter("productFilter", filter);
         mappingJacksonValue.setFilters(categoryFilter);
         return mappingJacksonValue;
     }

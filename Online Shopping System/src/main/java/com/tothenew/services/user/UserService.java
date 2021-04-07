@@ -12,13 +12,12 @@ import com.tothenew.objects.AddressDto;
 import com.tothenew.objects.ResetPasswordDto;
 import com.tothenew.repos.AddressRepository;
 import com.tothenew.repos.RoleRepository;
+import com.tothenew.repos.VerificationTokenRepository;
 import com.tothenew.repos.product.CategoryRepository;
 import com.tothenew.repos.user.UserRepository;
-import com.tothenew.repos.VerificationTokenRepository;
 import com.tothenew.services.EmailService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -62,7 +61,11 @@ public class UserService {
 
 
     public User findUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new UserNotFoundException("User not found with email: " + email);
+        }
+        return user;
     }
 
 
@@ -297,6 +300,7 @@ public class UserService {
         mailMessage.setText("Your product: " + name + ", has been activated successfully!");
         emailService.sendEmail(mailMessage);
     }
+
     public void sendProductDeactivatedMessage(String name, String email) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(email);
