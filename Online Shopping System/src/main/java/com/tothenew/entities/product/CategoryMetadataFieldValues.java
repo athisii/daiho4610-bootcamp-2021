@@ -1,5 +1,6 @@
 package com.tothenew.entities.product;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
+@JsonFilter("categoryMetadataFieldValuesFilter")
 public class CategoryMetadataFieldValues {
     @JsonIgnore
     @EmbeddedId

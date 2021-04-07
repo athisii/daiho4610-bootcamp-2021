@@ -5,21 +5,21 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.tothenew.entities.product.CategoryMetadataField;
-import com.tothenew.entities.product.Product;
 import com.tothenew.objects.CreateCategoryDto;
 import com.tothenew.objects.CategoryMetadataFieldDto;
+import com.tothenew.objects.PagingAndSortingDto;
 import com.tothenew.objects.categorymetadata.CategoryMetadataFieldValuesDto;
 import com.tothenew.objects.UpdateCategoryDto;
 import com.tothenew.services.user.AdminService;
 import com.tothenew.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 
 @RestController
@@ -32,22 +32,24 @@ public class AdminResource {
     private AdminService adminService;
 
     @GetMapping("/admin/customer")
-    public MappingJacksonValue profile() {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(userService.getAllCustomers());
-        mappingJacksonValue.setFilters(filter());
-        return mappingJacksonValue;
+    public MappingJacksonValue profile(@RequestBody PagingAndSortingDto pagingAndSortingDto) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getAllCustomers(pagingAndSortingDto));
+        return addFilter(mappingJacksonValue);
     }
 
     @GetMapping("/admin/seller")
-    public MappingJacksonValue retrieveAllSellers() {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(userService.getAllSellers());
-        mappingJacksonValue.setFilters(filter());
-        return mappingJacksonValue;
+    public MappingJacksonValue retrieveAllSellers(PagingAndSortingDto pagingAndSortingDto) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getAllSellers(pagingAndSortingDto));
+        return addFilter(mappingJacksonValue);
     }
 
-    private FilterProvider filter() {
+
+    private MappingJacksonValue addFilter(MappingJacksonValue mappingJacksonValue) {
         SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAll();
-        return new SimpleFilterProvider().addFilter("userFilter", filter);
+        SimpleFilterProvider userFilter = new SimpleFilterProvider().addFilter("userFilter", filter);
+        mappingJacksonValue.setFilters(userFilter);
+        return mappingJacksonValue;
+
     }
 
     @PutMapping("/admin/activate-user")
@@ -63,8 +65,8 @@ public class AdminResource {
     }
 
     @GetMapping("/admin/metadata-field")
-    public List<CategoryMetadataField> retrieveAllCategoryMetadataFields() {
-        return adminService.getAllCategoryMetadataFields();
+    public Page<CategoryMetadataField> retrieveAllCategoryMetadataFields(@RequestBody PagingAndSortingDto pagingAndSortingDto) {
+        return adminService.getAllCategoryMetadataFields(pagingAndSortingDto);
     }
 
     @PostMapping("/admin/add-metadata-field")
@@ -83,8 +85,12 @@ public class AdminResource {
     @GetMapping("/admin/category/{categoryId}")
     public MappingJacksonValue retrieveCategory(@PathVariable Long categoryId) {
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getCategoryById(categoryId));
-        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "parentCategory", "categoryMetadataFieldValues");
-        mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("categoryFilter", filter));
+        SimpleBeanPropertyFilter filter1 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "parentCategory");
+        SimpleBeanPropertyFilter filter2 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name");
+        SimpleFilterProvider filters = new SimpleFilterProvider();
+        filters.addFilter("categoryFilter", filter1)
+                .addFilter("parentCategoryFilter", filter2);
+        mappingJacksonValue.setFilters(filters);
         return mappingJacksonValue;
     }
 
@@ -121,17 +127,23 @@ public class AdminResource {
     @GetMapping("/admin/product/{productId}")
     public MappingJacksonValue retrieveProduct(@PathVariable Long productId) {
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getProductById(productId));
-        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "brand", "name", "active", "returnable", "description", "productVariations", "cancelable", "category", "seller");
-        SimpleFilterProvider categoryFilter = new SimpleFilterProvider().addFilter("productFilter", filter).addFilter("categoryFilter", filter).addFilter("userFilter", filter);
-        mappingJacksonValue.setFilters(categoryFilter);
-        return mappingJacksonValue;
+        return addFilters(mappingJacksonValue);
     }
 
     @GetMapping("/admin/product")
-    public MappingJacksonValue retrieveAllProducts() {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getAllProducts());
-        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "brand", "name", "active", "returnable", "description", "productVariations", "cancelable", "category", "seller");
-        SimpleFilterProvider categoryFilter = new SimpleFilterProvider().addFilter("productFilter", filter).addFilter("categoryFilter", filter).addFilter("userFilter", filter);
+    public MappingJacksonValue retrieveAllProducts(@RequestBody PagingAndSortingDto pagingAndSortingDto) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getAllProducts(pagingAndSortingDto));
+        return addFilters(mappingJacksonValue);
+    }
+
+    private MappingJacksonValue addFilters(MappingJacksonValue mappingJacksonValue) {
+        var filter1 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "brand", "active", "description", "cancelable", "category", "productVariations");
+        var filter2 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name");
+        var filter3 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "quantityAvailable", "price", "primaryImageName", "active", "metadata");
+        SimpleFilterProvider categoryFilter = new SimpleFilterProvider()
+                .addFilter("productFilter", filter1)
+                .addFilter("categoryFilter", filter2)
+                .addFilter("productVariationFilter", filter3);
         mappingJacksonValue.setFilters(categoryFilter);
         return mappingJacksonValue;
     }

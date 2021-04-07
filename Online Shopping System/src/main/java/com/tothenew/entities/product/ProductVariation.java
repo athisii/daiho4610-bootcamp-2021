@@ -1,5 +1,6 @@
 package com.tothenew.entities.product;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,6 +20,7 @@ import javax.persistence.*;
         name = "json",
         typeClass = JsonStringType.class
 )
+@JsonFilter("productVariationFilter")
 public class ProductVariation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -98,38 +98,47 @@ public class SellerResource {
     }
 
 
-    @GetMapping("/seller/product/{productId}")
-    public MappingJacksonValue retrieveProductById(Principal principal, @PathVariable Long productId) {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.getProductById(principal.getName(), productId));
+    private MappingJacksonValue addFilter(MappingJacksonValue mappingJacksonValue) {
         SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "brand", "active", "returnable", "description", "cancelable", "category");
-        SimpleFilterProvider categoryFilter = new SimpleFilterProvider().addFilter("productFilter", filter).addFilter("categoryFilter", filter);
-        mappingJacksonValue.setFilters(categoryFilter);
+        SimpleFilterProvider filterProvider = new SimpleFilterProvider().addFilter("productFilter", filter).addFilter("categoryFilter", filter);
+        mappingJacksonValue.setFilters(filterProvider);
         return mappingJacksonValue;
     }
 
+    @GetMapping("/seller/product/{productId}")
+    public MappingJacksonValue retrieveProductById(Principal principal, @PathVariable Long productId) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.getProductById(principal.getName(), productId));
+        return addFilter(mappingJacksonValue);
+    }
+
     @GetMapping("/seller/product")
-    public MappingJacksonValue retrieveAllProducts(Principal principal) {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.getAllProducts(principal.getName()));
-        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("category");
-        SimpleFilterProvider categoryFilter = new SimpleFilterProvider().addFilter("categoryFilter", filter); //.addFilter("productFilter", filter)
-        mappingJacksonValue.setFilters(categoryFilter);
-        return mappingJacksonValue;
+    public MappingJacksonValue retrieveAllProducts(@RequestBody PagingAndSortingDto pagingAndSortingDto, Principal principal) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.getAllProducts(pagingAndSortingDto, principal.getName()));
+        return addFilter(mappingJacksonValue);
     }
 
     @GetMapping("/seller/product-variation/{productVariationId}")
     public MappingJacksonValue retrieveProductVariationById(Principal principal, @PathVariable Long productVariationId) {
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.getProductVariationById(principal.getName(), productVariationId));
-        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "brand", "name", "description", "category");
-        SimpleFilterProvider categoryFilter = new SimpleFilterProvider().addFilter("productFilter", filter).addFilter("categoryFilter", filter);
-        mappingJacksonValue.setFilters(categoryFilter);
+        var filter1 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "quantityAvailable", "price", "primaryImageName", "active", "product", "metadata");
+        var filter2 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "brand", "active", "returnable", "description", "cancelable", "category");
+        var filter3 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name");
+        SimpleFilterProvider filterProvider = new SimpleFilterProvider()
+                .addFilter("productVariationFilter", filter1)
+                .addFilter("productFilter", filter2)
+                .addFilter("categoryFilter", filter3);
+        mappingJacksonValue.setFilters(filterProvider);
         return mappingJacksonValue;
     }
 
     @GetMapping("/seller/product/product-variation/{productId}")
-    public MappingJacksonValue retrieveAllProductVariationForProductById(Principal principal, @PathVariable Long productId) {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.getAllProductVariationForProductById(principal.getName(), productId));
-        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id");
-        SimpleFilterProvider categoryFilter = new SimpleFilterProvider().addFilter("productFilter", filter);
+    public MappingJacksonValue retrieveAllProductVariationForProductById(@RequestBody PagingAndSortingDto pagingAndSortingDto, Principal principal, @PathVariable Long productId) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.getAllProductVariationForProductById(pagingAndSortingDto, principal.getName(), productId));
+        var filter1 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "quantityAvailable", "price", "primaryImageName", "active", "metadata", "product");
+        var filter2 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name");
+        SimpleFilterProvider categoryFilter = new SimpleFilterProvider()
+                .addFilter("productVariationFilter", filter1)
+                .addFilter("productFilter", filter2);
         mappingJacksonValue.setFilters(categoryFilter);
         return mappingJacksonValue;
     }

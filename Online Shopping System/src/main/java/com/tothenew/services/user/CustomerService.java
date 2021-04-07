@@ -213,9 +213,7 @@ public class CustomerService {
         }, () -> {
             throw new ProductExistException("Not found for product with id: " + productId);
         });
-        Product product = productOptional.get();
-        Category category = product.getCategory();
-        return category.getProducts();
+        return productOptional.get().getCategory().getProducts();
 
     }
 }

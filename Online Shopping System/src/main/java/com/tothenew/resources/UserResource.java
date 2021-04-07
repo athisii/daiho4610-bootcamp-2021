@@ -3,6 +3,7 @@ package com.tothenew.resources;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.tothenew.entities.product.Category;
+import com.tothenew.objects.PagingAndSortingDto;
 import com.tothenew.objects.ResetPasswordDto;
 import com.tothenew.repos.user.UserRepository;
 import com.tothenew.services.user.UserService;
@@ -39,11 +40,15 @@ public class UserResource {
     }
 
     @GetMapping("/category")
-    public MappingJacksonValue viewAllCategories() {
-//        return userService.getAllCategories();
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(userService.getAllCategories());
-        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "parentCategory", "categoryMetadataFieldValues");
-        mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("categoryFilter", filter));
+    public MappingJacksonValue viewAllCategories(@RequestBody PagingAndSortingDto pagingAndSortingDto) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(userService.getAllCategories(pagingAndSortingDto));
+        SimpleBeanPropertyFilter filter1 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "parentCategory");
+        SimpleBeanPropertyFilter filter2 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name");
+        SimpleFilterProvider filterProvider = new SimpleFilterProvider()
+                .addFilter("categoryFilter", filter1)
+                .addFilter("parentCategoryFilter", filter2);
+
+        mappingJacksonValue.setFilters(filterProvider);
         return mappingJacksonValue;
     }
 }

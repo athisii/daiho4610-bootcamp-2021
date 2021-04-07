@@ -65,7 +65,7 @@ public class Bootstrap implements ApplicationRunner {
 
 
             Seller seller = new Seller();
-            seller.setEmail("seller@tothenew.com");
+            seller.setEmail("seller1@tothenew.com");
             seller.setPassword(passwordEncoder.encode("password"));
             seller.getRoles().add(role_seller);
             seller.setFirstName("John");
@@ -76,7 +76,7 @@ public class Bootstrap implements ApplicationRunner {
 
 
             Customer customer = new Customer();
-            customer.setEmail("customer@tothenew.com");
+            customer.setEmail("customer1@tothenew.com");
             customer.setPassword(passwordEncoder.encode("password"));
             customer.getRoles().add(role_customer);
             customer.setFirstName("Rose");

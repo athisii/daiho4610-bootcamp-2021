@@ -18,10 +18,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonFilter("productFilter")
-@JsonIdentityInfo(
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id"
-)
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +27,7 @@ public class Product {
     private String description;
     private boolean isCancelable;
     private boolean isReturnable;
-    private boolean isActive;
+    private boolean isActive = true;
     private boolean isDeleted;
 
     @ManyToOne(optional = false)

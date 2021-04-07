@@ -15,10 +15,6 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@JsonIdentityInfo(
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id"
-)
 @JsonFilter("categoryFilter")
 public class Category {
     @Id

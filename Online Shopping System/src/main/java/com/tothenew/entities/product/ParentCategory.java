@@ -1,5 +1,6 @@
 package com.tothenew.entities.product;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
@@ -14,6 +15,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@JsonFilter("parentCategoryFilter")
 public class ParentCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

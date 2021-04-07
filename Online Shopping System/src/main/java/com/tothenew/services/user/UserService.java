@@ -9,6 +9,7 @@ import com.tothenew.exception.InvalidTokenException;
 import com.tothenew.exception.UserActivationException;
 import com.tothenew.exception.UserNotFoundException;
 import com.tothenew.objects.AddressDto;
+import com.tothenew.objects.PagingAndSortingDto;
 import com.tothenew.objects.ResetPasswordDto;
 import com.tothenew.repos.AddressRepository;
 import com.tothenew.repos.RoleRepository;
@@ -18,6 +19,10 @@ import com.tothenew.repos.user.UserRepository;
 import com.tothenew.services.EmailService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -196,14 +201,6 @@ public class UserService {
     }
 
 
-    public List<Customer> getAllCustomers() {
-        return userRepository.findAllCustomers();
-    }
-
-    public List<Seller> getAllSellers() {
-        return userRepository.findAllSellers();
-    }
-
     public void activateUserById(Long userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         userOptional.orElseThrow(() -> new UserNotFoundException("No user found for id: " + userId));
@@ -277,8 +274,13 @@ public class UserService {
         });
     }
 
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    public Page<Category> getAllCategories(PagingAndSortingDto pagingAndSortingDto) {
+        return categoryRepository.findAll(getPageable(pagingAndSortingDto));
+    }
+
+    private Pageable getPageable(PagingAndSortingDto pagingAndSortingDto) {
+        Sort sort = Sort.by(pagingAndSortingDto.getOrder(), pagingAndSortingDto.getSortBy());
+        return PageRequest.of(pagingAndSortingDto.getOffset(), pagingAndSortingDto.getMax(), sort);
     }
 
     public void sendProductActivationMessage(Product product) {
