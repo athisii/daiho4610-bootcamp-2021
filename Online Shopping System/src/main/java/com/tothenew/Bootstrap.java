@@ -62,6 +62,7 @@ public class Bootstrap implements ApplicationRunner {
             admin.setLastName("");
             admin.getRoles().add(role_admin);
             admin.setActive(true);
+            admin.setImageUrl("image/path/1");
 
 
             Seller seller = new Seller();
@@ -73,6 +74,7 @@ public class Bootstrap implements ApplicationRunner {
             seller.setActive(true);
             seller.setCompanyContact("7005703425");
             seller.setCompanyName("TO THE NEW");
+            seller.setImageUrl("image/path/2");
 
 
             Customer customer = new Customer();
@@ -111,7 +113,7 @@ public class Bootstrap implements ApplicationRunner {
 
             //Product
             ParentCategory fashion = new ParentCategory("Fashion");
-            ParentCategory electronic = new ParentCategory("Electronic");
+            ParentCategory electronic = new ParentCategory("Electronics");
 
             CategoryMetadataField cmf1 = new CategoryMetadataField("Size");
             CategoryMetadataField cmf2 = new CategoryMetadataField("Colour");

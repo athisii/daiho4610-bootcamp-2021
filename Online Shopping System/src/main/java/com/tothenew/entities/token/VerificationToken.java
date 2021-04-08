@@ -1,7 +1,6 @@
 package com.tothenew.entities.token;
 
 import com.tothenew.entities.user.User;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

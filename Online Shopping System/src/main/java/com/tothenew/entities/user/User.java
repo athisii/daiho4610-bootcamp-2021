@@ -29,12 +29,13 @@ public class User {
     private String firstName;
     private String middleName;
     private String lastName;
-    private String imageUrl = "img/customer/" + id;
+    private String imageUrl = "img/path/";
     private boolean isDeleted;
     private boolean isActive;
     private boolean accountNonLocked = true;
     private int failedAttempt;
     private Date lockTime;
+    private Date dateCreated = new Date();
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",

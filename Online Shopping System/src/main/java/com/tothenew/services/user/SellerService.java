@@ -167,6 +167,7 @@ public class SellerService {
         if (product.getSeller().getId().equals(seller.getId())) {
             product.setDeleted(true);
             productRepository.save(product);
+            return;
         }
         throw new ProductExistException("No product found for id: " + productId);
 

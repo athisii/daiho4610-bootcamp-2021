@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -29,6 +30,7 @@ public class Product {
     private boolean isReturnable;
     private boolean isActive = true;
     private boolean isDeleted;
+    private Date dateCreated = new Date();
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "seller_id")

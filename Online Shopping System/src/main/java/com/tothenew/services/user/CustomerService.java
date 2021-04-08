@@ -86,10 +86,7 @@ public class CustomerService {
     }
 
     public void resendToken(EmailDto emailDto) throws UserNotFoundException {
-        User user = userRepository.findByEmail(emailDto.getEmail());
-        if (user == null) {
-            throw new UserNotFoundException("No such email found!");
-        }
+        User user = userService.findUserByEmail(emailDto.getEmail());
         if (user.isActive()) {
             throw new UserActivationException("User already activated");
         }
@@ -104,16 +101,8 @@ public class CustomerService {
         return userRepository.findByEmail(email) != null;
     }
 
-    public void confirmResetPassword(ResetPasswordDto resetPasswordDto, String token) {
-        userService.resetPassword(resetPasswordDto, token);
-
-    }
-
     public void resetPassword(EmailDto emailDto) {
-        User user = userRepository.findByEmail(emailDto.getEmail());
-        if (user == null) {
-            throw new UserNotFoundException("No such email found!");
-        }
+        User user = userService.findUserByEmail(emailDto.getEmail());
         if (!user.isActive()) {
             throw new UserActivationException("User not activated");
         }
@@ -121,7 +110,7 @@ public class CustomerService {
     }
 
     public User viewProfile(String email) {
-        return userRepository.findByEmail(email);
+        return userService.findUserByEmail(email);
     }
 
 
@@ -143,7 +132,7 @@ public class CustomerService {
     }
 
     public void addAddress(String email, AddressDto addressDto) {
-        User user = userRepository.findByEmail(email);
+        User user = userService.findUserByEmail(email);
         Address address = new Address();
         ModelMapper mm = new ModelMapper();
         mm.map(addressDto, address);
@@ -169,6 +158,12 @@ public class CustomerService {
         Optional<ParentCategory> pCategoryOpt = parentCategoryRepository.findById(categoryId);
         pCategoryOpt.orElseThrow(() -> new CategoryExistException("Not found for category with id: " + categoryId));
         return pCategoryOpt.get().getCategories();
+    }
+
+    public Category getFilterDetailsOfACategory(Long categoryId) {
+        Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
+        categoryOptional.orElseThrow(() -> new CategoryExistException("Not found for category with id: " + categoryId));
+       return categoryOptional.get();
     }
 
     public Product getProduct(Long productId) {
@@ -216,5 +211,7 @@ public class CustomerService {
         return productOptional.get().getCategory().getProducts();
 
     }
+
+
 }
 

@@ -113,10 +113,22 @@ public class CustomerResource {
 
     //Filtering
     @GetMapping("/customer/category/{categoryId}")
-    public MappingJacksonValue retrieveCategory(@PathVariable Long categoryId) {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.getAllCategories(categoryId));
-        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "categoryMetadataFieldValues");
-        mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("categoryFilter", filter));
+    public MappingJacksonValue retrieveFilterDetailsOfACategory(@PathVariable Long categoryId) {
+        Category v = customerService.getFilterDetailsOfACategory(categoryId);
+        System.out.println(v);
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(v);
+        SimpleBeanPropertyFilter filter1 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "categoryMetadataFieldValues", "products");
+        SimpleBeanPropertyFilter filter2 = SimpleBeanPropertyFilter.filterOutAllExcept("categoryMetadataField", "value");
+        SimpleBeanPropertyFilter filter3 = SimpleBeanPropertyFilter.filterOutAllExcept("brand", "productVariations");
+        SimpleBeanPropertyFilter filter4 = SimpleBeanPropertyFilter.filterOutAllExcept("price");
+        SimpleFilterProvider filterProvider = new SimpleFilterProvider()
+                .addFilter("categoryFilter", filter1)
+                .addFilter("categoryMetadataFieldValuesFilter", filter2)
+                .addFilter("productFilter", filter3)
+                .addFilter("productVariationFilter", filter4);
+
+
+        mappingJacksonValue.setFilters(filterProvider);
         return mappingJacksonValue;
     }
 

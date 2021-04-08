@@ -29,7 +29,7 @@ public class Category {
     @OneToMany(mappedBy = "category")
     private List<Product> products = new ArrayList<>();
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.MERGE)
     private List<CategoryMetadataFieldValues> categoryMetadataFieldValues = new ArrayList<>();
 
     public Category(String name) {
