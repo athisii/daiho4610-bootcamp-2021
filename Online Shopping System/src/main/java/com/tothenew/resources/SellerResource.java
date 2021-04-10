@@ -10,6 +10,7 @@ import com.tothenew.objects.product.UpdateProductDto;
 import com.tothenew.objects.product.UpdateProductVariationDto;
 import com.tothenew.services.user.SellerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -37,8 +38,8 @@ public class SellerResource {
     }
 
     @GetMapping("/seller/profile")
-    public MappingJacksonValue profile(Principal user) {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.viewProfile(user.getName()));
+    public MappingJacksonValue profile(Principal principal) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.viewProfile(principal.getName()));
         SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "firstName", "lastName", "imageUrl", "companyContact", "companyName", "active", "addresses");
         mappingJacksonValue.setFilters(filter(filter));
         return mappingJacksonValue;
@@ -49,14 +50,14 @@ public class SellerResource {
     }
 
     @PutMapping("/seller/profile")
-    public ResponseEntity<?> updateProfile(@Valid Principal user, @RequestBody UpdateProfileDto updateProfileDto) {
-        sellerService.updateProfile(user.getName(), updateProfileDto);
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateProfileDto updateProfileDto, Principal principal) {
+        sellerService.updateProfile(principal.getName(), updateProfileDto);
         return new ResponseEntity<>("Profile updated successfully!", HttpStatus.OK);
     }
 
     @PutMapping("/seller/update-password")
-    public ResponseEntity<String> updatePassword(@Valid Principal user, @RequestBody ResetPasswordDto resetPasswordDto) {
-        sellerService.updatePassword(user.getName(), resetPasswordDto);
+    public ResponseEntity<String> updatePassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto, Principal principal) {
+        sellerService.updatePassword(principal.getName(), resetPasswordDto);
         return new ResponseEntity<>("Password updated successfully!", HttpStatus.OK);
     }
 
@@ -92,7 +93,7 @@ public class SellerResource {
     }
 
     @DeleteMapping("/seller/delete-product/{productId}")
-    public ResponseEntity<String> deleteProduct(@Valid Principal principal, @PathVariable Long productId) {
+    public ResponseEntity<String> deleteProduct(Principal principal, @PathVariable Long productId) {
         sellerService.deleteProduct(principal.getName(), productId);
         return new ResponseEntity<>("Product deleted successfully!", HttpStatus.OK);
     }
@@ -112,8 +113,8 @@ public class SellerResource {
     }
 
     @GetMapping("/seller/product")
-    public MappingJacksonValue retrieveAllProducts(@RequestBody PagingAndSortingDto pagingAndSortingDto, Principal principal) {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.getAllProducts(pagingAndSortingDto, principal.getName()));
+    public MappingJacksonValue retrieveAllProducts(Pageable pageable, Principal principal) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.getAllProducts(pageable, principal.getName()));
         return addFilter(mappingJacksonValue);
     }
 
@@ -132,8 +133,8 @@ public class SellerResource {
     }
 
     @GetMapping("/seller/product/product-variation/{productId}")
-    public MappingJacksonValue retrieveAllProductVariationForProductById(@RequestBody PagingAndSortingDto pagingAndSortingDto, Principal principal, @PathVariable Long productId) {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.getAllProductVariationForProductById(pagingAndSortingDto, principal.getName(), productId));
+    public MappingJacksonValue retrieveAllProductVariationForProductById(Pageable pageable, Principal principal, @PathVariable Long productId) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(sellerService.getAllProductVariationForProductById(pageable, principal.getName(), productId));
         var filter1 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "quantityAvailable", "price", "primaryImageName", "active", "metadata", "product");
         var filter2 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name");
         SimpleFilterProvider categoryFilter = new SimpleFilterProvider()

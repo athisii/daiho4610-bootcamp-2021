@@ -8,7 +8,6 @@ import com.tothenew.exception.CategoryMetadataFieldException;
 import com.tothenew.exception.ProductExistException;
 import com.tothenew.objects.CategoryMetadataFieldDto;
 import com.tothenew.objects.CreateCategoryDto;
-import com.tothenew.objects.PagingAndSortingDto;
 import com.tothenew.objects.UpdateCategoryDto;
 import com.tothenew.objects.categorymetadata.CategoryMetadataFieldValuesDto;
 import com.tothenew.objects.categorymetadata.MetadataFieldIdValue;
@@ -17,9 +16,7 @@ import com.tothenew.repos.user.CustomerRepository;
 import com.tothenew.repos.user.SellerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -49,17 +46,13 @@ public class AdminService {
     @Autowired
     private UserService userService;
 
-    private Pageable getPageable(PagingAndSortingDto pagingAndSortingDto) {
-        Sort sort = Sort.by(pagingAndSortingDto.getOrder(), pagingAndSortingDto.getSortBy());
-        return PageRequest.of(pagingAndSortingDto.getOffset(), pagingAndSortingDto.getMax(), sort);
+
+    public Page<Customer> getAllCustomers(Pageable pageable) {
+        return customerRepository.findAll(pageable);
     }
 
-    public Page<Customer> getAllCustomers(PagingAndSortingDto pagingAndSortingDto) {
-        return customerRepository.findAll(getPageable(pagingAndSortingDto));
-    }
-
-    public Page<Seller> getAllSellers(PagingAndSortingDto pagingAndSortingDto) {
-        return sellerRepository.findAll(getPageable(pagingAndSortingDto));
+    public Page<Seller> getAllSellers(Pageable pageable) {
+        return sellerRepository.findAll(pageable);
     }
 
 
@@ -73,8 +66,8 @@ public class AdminService {
 
     }
 
-    public Page<CategoryMetadataField> getAllCategoryMetadataFields(PagingAndSortingDto pagingAndSortingDto) {
-        return categoryMetadataFieldRepository.findAll(getPageable(pagingAndSortingDto));
+    public Page<CategoryMetadataField> getAllCategoryMetadataFields(Pageable pageable) {
+        return categoryMetadataFieldRepository.findAll(pageable);
     }
 
     public Long addCategory(CreateCategoryDto categoryDto) {
@@ -237,7 +230,7 @@ public class AdminService {
         return productOptional.get();
     }
 
-    public Page<Product> getAllProducts(PagingAndSortingDto pagingAndSortingDto) {
-        return productRepository.findAll(getPageable(pagingAndSortingDto));
+    public Page<Product> getAllProducts(Pageable pageable) {
+        return productRepository.findAll(pageable);
     }
 }

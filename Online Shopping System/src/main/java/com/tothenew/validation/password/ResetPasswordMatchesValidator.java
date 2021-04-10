@@ -1,7 +1,6 @@
 package com.tothenew.validation.password;
 
 import com.tothenew.objects.ResetPasswordDto;
-import com.tothenew.objects.UserDto;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

@@ -50,19 +50,19 @@ public class CustomerResource {
 
 
     @PutMapping("/customer/profile")
-    public ResponseEntity<?> updateProfile(@Valid Principal user, @RequestBody UpdateProfileDto updateProfileDto) {
-        customerService.updateProfile(user.getName(), updateProfileDto);
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateProfileDto updateProfileDto, Principal principal) {
+        customerService.updateProfile(principal.getName(), updateProfileDto);
         return new ResponseEntity<>("Profile updated successfully!", HttpStatus.OK);
     }
 
     @GetMapping("/customer/address")
-    public List<Address> addresses(Principal user) {
-        return customerService.addresses(user.getName());
+    public List<Address> addresses(Principal principal) {
+        return customerService.addresses(principal.getName());
     }
 
     @PostMapping("/customer/add-address")
-    public ResponseEntity<String> addAddress(@Valid Principal user, @RequestBody AddressDto addressDto) {
-        customerService.addAddress(user.getName(), addressDto);
+    public ResponseEntity<String> addAddress(@Valid @RequestBody AddressDto addressDto, Principal principal) {
+        customerService.addAddress(principal.getName(), addressDto);
         return new ResponseEntity<>("Address added successfully!", HttpStatus.OK);
     }
 
@@ -79,14 +79,14 @@ public class CustomerResource {
     }
 
     @PutMapping("/customer/update-password")
-    public ResponseEntity<String> updatePassword(@Valid Principal user, @RequestBody ResetPasswordDto resetPasswordDto) {
-        customerService.updatePassword(user.getName(), resetPasswordDto);
+    public ResponseEntity<String> updatePassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto, Principal principal) {
+        customerService.updatePassword(principal.getName(), resetPasswordDto);
         return new ResponseEntity<>("Password updated successfully!", HttpStatus.OK);
     }
 
     @GetMapping("/customer/profile")
-    public MappingJacksonValue profile(Principal user) {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.viewProfile(user.getName()));
+    public MappingJacksonValue profile(Principal principal) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.viewProfile(principal.getName()));
         SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "firstName", "lastName", "imageUrl", "contact", "active");
         mappingJacksonValue.setFilters(filter(filter));
         return mappingJacksonValue;
@@ -97,14 +97,14 @@ public class CustomerResource {
     }
 
     @GetMapping("/customer/category")
-    public MappingJacksonValue retrieveParentCategories(@RequestBody CategoryIdDto categoryIdDto) {
-        Long categoryId = categoryIdDto.getCategoryId();
-        if (categoryId == null) {
+    public MappingJacksonValue retrieveParentCategories(@RequestBody(required = false) CategoryIdDto categoryIdDto) {
+        if (categoryIdDto == null) {
             MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.getAllCategories(null));
             SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name");
             mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("parentCategoryFilter", filter));
             return mappingJacksonValue;
         }
+        Long categoryId = categoryIdDto.getCategoryId();
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.getAllCategories(categoryId));
         SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "parentCategory");
         mappingJacksonValue.setFilters(new SimpleFilterProvider().addFilter("categoryFilter", filter).addFilter("parentCategoryFilter", filter));

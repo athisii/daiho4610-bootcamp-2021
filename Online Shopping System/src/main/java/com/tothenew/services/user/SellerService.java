@@ -17,9 +17,7 @@ import com.tothenew.repos.user.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -55,10 +53,6 @@ public class SellerService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private Pageable getPageable(PagingAndSortingDto pagingAndSortingDto) {
-        Sort sort = Sort.by(pagingAndSortingDto.getOrder(), pagingAndSortingDto.getSortBy());
-        return PageRequest.of(pagingAndSortingDto.getOffset(), pagingAndSortingDto.getMax(), sort);
-    }
 
     public void registerNewSeller(SellerDto sellerDto)
             throws UserAlreadyExistException {
@@ -133,7 +127,7 @@ public class SellerService {
         product.setSeller(seller);
         product.setCategory(category);
         productRepository.save(product);
-//        userService.sendProductActivationMessage(product);
+        userService.sendProductActivationMessage(product);
     }
 
 
@@ -142,9 +136,9 @@ public class SellerService {
     }
 
 
-    public Page<Product> getAllProducts(PagingAndSortingDto pagingAndSortingDto, String email) {
+    public Page<Product> getAllProducts(Pageable pageable, String email) {
         Seller seller = (Seller) userService.findUserByEmail(email);
-        return productRepository.findBySellerId(seller.getId(), getPageable(pagingAndSortingDto));
+        return productRepository.findBySellerId(seller.getId(), pageable);
 //        return seller.getProducts();
     }
 
@@ -216,13 +210,13 @@ public class SellerService {
         throw new ProductExistException("No product variation found for id: " + productVariationId);
     }
 
-    public Page<ProductVariation> getAllProductVariationForProductById(PagingAndSortingDto pagingAndSortingDto, String email, Long productId) {
+    public Page<ProductVariation> getAllProductVariationForProductById(Pageable pageable, String email, Long productId) {
         Seller seller = (Seller) userService.findUserByEmail(email);
         Optional<Product> productOptional = productRepository.findById(productId);
         productOptional.orElseThrow(() -> new ProductExistException("No product found for id: " + productId));
         Product product = productOptional.get();
         if (product.getSeller().getId().equals(seller.getId()) && !product.isDeleted()) {
-            return productVariationRepository.findByProductId(product.getId(), getPageable(pagingAndSortingDto));
+            return productVariationRepository.findByProductId(product.getId(), pageable);
         }
         throw new ProductExistException("No product found for id: " + productId);
     }

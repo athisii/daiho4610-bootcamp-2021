@@ -1,8 +1,6 @@
 package com.tothenew.entities.product;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.tothenew.entities.user.Seller;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,7 +26,7 @@ public class Product {
     private String description;
     private boolean isCancelable;
     private boolean isReturnable;
-    private boolean isActive = true;
+    private boolean isActive;
     private boolean isDeleted;
     private Date dateCreated = new Date();
 

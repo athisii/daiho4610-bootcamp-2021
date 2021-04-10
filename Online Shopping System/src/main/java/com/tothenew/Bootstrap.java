@@ -44,14 +44,11 @@ public class Bootstrap implements ApplicationRunner {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 
-            Role role_admin = new Role();
-            role_admin.setAuthority("ROLE_ADMIN");
+            Role role_admin = new Role("ROLE_ADMIN");
 
-            Role role_seller = new Role();
-            role_seller.setAuthority("ROLE_SELLER");
+            Role role_seller = new Role("ROLE_SELLER");
 
-            Role role_customer = new Role();
-            role_customer.setAuthority("ROLE_CUSTOMER");
+            Role role_customer = new Role("ROLE_CUSTOMER");
             roleRepository.saveAll(List.of(role_admin, role_seller, role_customer));
 
             User admin = new Admin();

@@ -2,19 +2,17 @@ package com.tothenew.resources;
 
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.tothenew.entities.product.Category;
-import com.tothenew.objects.PagingAndSortingDto;
 import com.tothenew.objects.ResetPasswordDto;
 import com.tothenew.repos.user.UserRepository;
 import com.tothenew.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RequestMapping("/")
 @RestController
@@ -40,8 +38,8 @@ public class UserResource {
     }
 
     @GetMapping("/category")
-    public MappingJacksonValue viewAllCategories(@RequestBody PagingAndSortingDto pagingAndSortingDto) {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(userService.getAllCategories(pagingAndSortingDto));
+    public MappingJacksonValue viewAllCategories(Pageable pageable) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(userService.getAllCategories(pageable));
         SimpleBeanPropertyFilter filter1 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "parentCategory");
         SimpleBeanPropertyFilter filter2 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name");
         SimpleFilterProvider filterProvider = new SimpleFilterProvider()

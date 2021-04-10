@@ -1,19 +1,19 @@
 package com.tothenew.resources;
 
 
-import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.tothenew.entities.product.CategoryMetadataField;
-import com.tothenew.objects.CreateCategoryDto;
 import com.tothenew.objects.CategoryMetadataFieldDto;
-import com.tothenew.objects.PagingAndSortingDto;
-import com.tothenew.objects.categorymetadata.CategoryMetadataFieldValuesDto;
+import com.tothenew.objects.CreateCategoryDto;
 import com.tothenew.objects.UpdateCategoryDto;
+import com.tothenew.objects.categorymetadata.CategoryMetadataFieldValuesDto;
 import com.tothenew.services.user.AdminService;
 import com.tothenew.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -32,14 +32,14 @@ public class AdminResource {
     private AdminService adminService;
 
     @GetMapping("/admin/customer")
-    public MappingJacksonValue profile(@RequestBody PagingAndSortingDto pagingAndSortingDto) {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getAllCustomers(pagingAndSortingDto));
+    public MappingJacksonValue profile(Pageable pageable) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getAllCustomers(pageable));
         return addFilter(mappingJacksonValue);
     }
 
     @GetMapping("/admin/seller")
-    public MappingJacksonValue retrieveAllSellers(PagingAndSortingDto pagingAndSortingDto) {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getAllSellers(pagingAndSortingDto));
+    public MappingJacksonValue retrieveAllSellers(Pageable pageable) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getAllSellers(pageable));
         return addFilter(mappingJacksonValue);
     }
 
@@ -65,8 +65,8 @@ public class AdminResource {
     }
 
     @GetMapping("/admin/metadata-field")
-    public Page<CategoryMetadataField> retrieveAllCategoryMetadataFields(@RequestBody PagingAndSortingDto pagingAndSortingDto) {
-        return adminService.getAllCategoryMetadataFields(pagingAndSortingDto);
+    public Page<CategoryMetadataField> retrieveAllCategoryMetadataFields(Pageable pageable) {
+        return adminService.getAllCategoryMetadataFields(pageable);
     }
 
     @PostMapping("/admin/add-metadata-field")
@@ -131,8 +131,8 @@ public class AdminResource {
     }
 
     @GetMapping("/admin/product")
-    public MappingJacksonValue retrieveAllProducts(@RequestBody PagingAndSortingDto pagingAndSortingDto) {
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getAllProducts(pagingAndSortingDto));
+    public MappingJacksonValue retrieveAllProducts(@PageableDefault(sort = "id") Pageable pageable) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getAllProducts(pageable));
         return addFilters(mappingJacksonValue);
     }
 
