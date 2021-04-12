@@ -1,7 +1,7 @@
 package com.tothenew.objects;
 
 import com.tothenew.entities.user.Address;
-import com.tothenew.validation.email.EmailValidator;
+import com.tothenew.validation.email.ValidEmail;
 import com.tothenew.validation.password.PasswordMatches;
 import com.tothenew.validation.password.ValidPassword;
 import com.tothenew.validation.phonenumber.Phone;
@@ -34,7 +34,7 @@ public class UserDto {
     @Size(min = 1)
     private String matchingPassword;
 
-    @EmailValidator.ValidEmail
+    @ValidEmail
     @NotNull
     @Size(min = 1, message = "Email should be well-formed")
     private String email;

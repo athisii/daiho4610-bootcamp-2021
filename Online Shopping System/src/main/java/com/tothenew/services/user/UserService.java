@@ -188,7 +188,6 @@ public class UserService {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
 
         mailMessage.setTo(registeredUser.getEmail());
-//        mailMessage.setFrom(adminEmailId);
         mailMessage.setSubject("Please reset your password");
         mailMessage.setText("To reset your password, please click here : "
                 + "http://localhost:8080/reset-password/confirm?token=" + createVerificationToken(registeredUser));

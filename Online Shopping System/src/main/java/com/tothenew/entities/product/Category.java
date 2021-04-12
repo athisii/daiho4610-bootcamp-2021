@@ -4,9 +4,13 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -14,11 +18,17 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @JsonFilter("categoryFilter")
+@EnableJpaAuditing
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @CreatedDate
+    private Date createdDate;
+    @LastModifiedDate
+    private Date modifiedDate;
+
 
     @ManyToOne
     @JoinColumn(name = "parent_id")

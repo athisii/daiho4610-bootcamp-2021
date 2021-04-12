@@ -8,8 +8,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Getter
@@ -21,6 +25,7 @@ import javax.persistence.*;
         typeClass = JsonStringType.class
 )
 @JsonFilter("productVariationFilter")
+@EntityListeners(AuditingEntityListener.class)
 public class ProductVariation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +34,10 @@ public class ProductVariation {
     private int price;
     private String primaryImageName;
     private boolean isActive = true;
+    @CreatedDate
+    private Date createdDate;
+    @LastModifiedDate
+    private Date modifiedDate;
 
     @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "id")

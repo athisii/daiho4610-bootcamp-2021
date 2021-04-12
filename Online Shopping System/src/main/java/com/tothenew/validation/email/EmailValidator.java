@@ -1,26 +1,17 @@
 package com.tothenew.validation.email;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.validation.Constraint;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.Payload;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-public class EmailValidator implements ConstraintValidator<EmailValidator.ValidEmail, String> {
+public class EmailValidator implements ConstraintValidator<ValidEmail, String> {
     private static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
     private static final Pattern PATTERN = Pattern.compile(EMAIL_PATTERN);
 
     @Override
-    public boolean isValid(final String username, final ConstraintValidatorContext context) {
-        return (validateEmail(username));
+    public boolean isValid(final String email, final ConstraintValidatorContext context) {
+        return (validateEmail(email));
     }
 
     private boolean validateEmail(final String email) {
@@ -28,13 +19,4 @@ public class EmailValidator implements ConstraintValidator<EmailValidator.ValidE
         return matcher.matches();
     }
 
-    @Target({TYPE, FIELD, ANNOTATION_TYPE})
-    @Retention(RUNTIME)
-    @Constraint(validatedBy = EmailValidator.class)
-    @Documented
-    public static @interface ValidEmail {
-        String message() default "Invalid email";
-        Class<?>[] groups() default {};
-        Class<? extends Payload>[] payload() default {};
-    }
 }

@@ -7,11 +7,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.*;
 
-
+@EntityListeners(AuditingEntityListener.class)
 @JsonFilter("userFilter")
 @JsonInclude(value = Include.NON_EMPTY)
 @Entity
@@ -35,7 +38,10 @@ public class User {
     private boolean accountNonLocked = true;
     private int failedAttempt;
     private Date lockTime;
-    private Date dateCreated = new Date();
+    @CreatedDate
+    private Date createdDate;
+    @LastModifiedDate
+    private Date modifiedDate;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",

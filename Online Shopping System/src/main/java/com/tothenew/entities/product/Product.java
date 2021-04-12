@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -17,6 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonFilter("productFilter")
+@EntityListeners(AuditingEntityListener.class)
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +32,10 @@ public class Product {
     private boolean isReturnable;
     private boolean isActive;
     private boolean isDeleted;
-    private Date dateCreated = new Date();
+    @CreatedDate
+    private Date createdDate;
+    @LastModifiedDate
+    private Date modifiedDate;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "seller_id")
