@@ -42,7 +42,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
-            throws InvalidTokenException, ServletException, IOException {
+            throws ServletException, IOException {
 
         String authorizationHeader = request.getHeader(jwtCofig.getAuthorizationHeader());
         if (Strings.isNullOrEmpty(authorizationHeader) || !authorizationHeader.startsWith(jwtCofig.getTokenPrefix())) {
@@ -67,10 +67,11 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email, null, roles);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (JwtException ignored) {
+            } catch (JwtException ex) {
             }
+            filterChain.doFilter(request, response);
         }
-        filterChain.doFilter(request, response);
+        throw new InvalidTokenException("Invalid Token");
     }
 
 

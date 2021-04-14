@@ -18,12 +18,11 @@ import java.util.Set;
 public class AppUserDaoService implements AppUserDao {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+
 
     @Autowired
     public AppUserDaoService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override

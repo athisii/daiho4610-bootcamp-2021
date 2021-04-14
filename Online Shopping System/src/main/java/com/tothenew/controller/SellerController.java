@@ -1,4 +1,4 @@
-package com.tothenew.resources;
+package com.tothenew.controller;
 
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
@@ -21,7 +21,7 @@ import java.security.Principal;
 
 
 @RestController
-public class SellerResource {
+public class SellerController {
     @Autowired
     private SellerService sellerService;
 
@@ -49,19 +49,19 @@ public class SellerResource {
         return new SimpleFilterProvider().addFilter("userFilter", filter);
     }
 
-    @PutMapping("/seller/profile")
+    @PatchMapping("/seller/profile")
     public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateProfileDto updateProfileDto, Principal principal) {
         sellerService.updateProfile(principal.getName(), updateProfileDto);
         return new ResponseEntity<>("Profile updated successfully!", HttpStatus.OK);
     }
 
-    @PutMapping("/seller/update-password")
+    @PatchMapping("/seller/update-password")
     public ResponseEntity<String> updatePassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto, Principal principal) {
         sellerService.updatePassword(principal.getName(), resetPasswordDto);
         return new ResponseEntity<>("Password updated successfully!", HttpStatus.OK);
     }
 
-    @PutMapping("/seller/update-address")
+    @PatchMapping("/seller/update-address")
     public ResponseEntity<String> updateAddress(@Valid @RequestBody AddressDto addressDto, @RequestParam Long addressId) {
         sellerService.updateAddress(addressDto, addressId);
         return new ResponseEntity<>("Address updated successfully!", HttpStatus.OK);
@@ -74,7 +74,7 @@ public class SellerResource {
         return new ResponseEntity<>("Product added successfully!", HttpStatus.OK);
     }
 
-    @PutMapping("/seller/update-product")
+    @PatchMapping("/seller/update-product")
     public ResponseEntity<String> updateProduct(@Valid @RequestBody UpdateProductDto updateProductDto, Principal principal) {
         sellerService.updateProduct(updateProductDto, principal.getName());
         return new ResponseEntity<>("Product updated successfully!", HttpStatus.OK);
@@ -86,7 +86,7 @@ public class SellerResource {
         return new ResponseEntity<>("Product Variation added successfully!", HttpStatus.OK);
     }
 
-    @PutMapping("/seller/update-product-variation")
+    @PatchMapping("/seller/update-product-variation")
     public ResponseEntity<String> updateProductVariation(@Valid @RequestBody UpdateProductVariationDto updateProductVariationDto, Principal principal) {
         sellerService.updateProductVariation(updateProductVariationDto, principal.getName());
         return new ResponseEntity<>("Product Variation updated successfully!", HttpStatus.OK);

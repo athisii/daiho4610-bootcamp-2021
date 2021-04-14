@@ -1,4 +1,4 @@
-package com.tothenew.resources;
+package com.tothenew.controller;
 
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
@@ -19,7 +19,7 @@ import java.util.List;
 
 
 @RestController
-public class CustomerResource {
+public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
@@ -30,7 +30,7 @@ public class CustomerResource {
         return new ResponseEntity<>("Your account has been created successfully, please check your email for activation.", HttpStatus.OK);
     }
 
-    @PutMapping("/register/customer/confirm-account")
+    @PatchMapping("/register/customer/confirm-account")
     public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token) {
         customerService.confirmRegisteredCustomer(token);
         return new ResponseEntity<>("Your account has been verified successfully! You can now log in.", HttpStatus.OK);
@@ -49,7 +49,7 @@ public class CustomerResource {
     }
 
 
-    @PutMapping("/customer/profile")
+    @PatchMapping("/customer/profile")
     public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateProfileDto updateProfileDto, Principal principal) {
         customerService.updateProfile(principal.getName(), updateProfileDto);
         return new ResponseEntity<>("Profile updated successfully!", HttpStatus.OK);
@@ -72,13 +72,13 @@ public class CustomerResource {
         return new ResponseEntity<>("Address deleted successfully!", HttpStatus.OK);
     }
 
-    @PutMapping("/customer/update-address")
+    @PatchMapping("/customer/update-address")
     public ResponseEntity<String> updateAddress(@Valid @RequestBody AddressDto addressDto, @RequestParam Long addressId) {
         customerService.updateAddress(addressDto, addressId);
         return new ResponseEntity<>("Address updated successfully!", HttpStatus.OK);
     }
 
-    @PutMapping("/customer/update-password")
+    @PatchMapping("/customer/update-password")
     public ResponseEntity<String> updatePassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto, Principal principal) {
         customerService.updatePassword(principal.getName(), resetPasswordDto);
         return new ResponseEntity<>("Password updated successfully!", HttpStatus.OK);
@@ -97,7 +97,7 @@ public class CustomerResource {
     }
 
     @GetMapping("/customer/category")
-    public MappingJacksonValue retrieveParentCategories(@RequestBody(required = false) CategoryIdDto categoryIdDto) {
+    public MappingJacksonValue retrieveParentCategories(@RequestBody CategoryIdDto categoryIdDto) {
         if (categoryIdDto == null) {
             MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.getAllCategories(null));
             SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name");

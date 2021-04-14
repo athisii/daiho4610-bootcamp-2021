@@ -1,4 +1,4 @@
-package com.tothenew.resources;
+package com.tothenew.controller;
 
 
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
@@ -23,7 +23,7 @@ import javax.validation.Valid;
 
 @RequestMapping("/admin")
 @RestController
-public class AdminResource {
+public class AdminController {
 
     @Autowired
     private UserService userService;
@@ -52,13 +52,13 @@ public class AdminResource {
 
     }
 
-    @PutMapping("/activate-user")
+    @PatchMapping("/activate-user")
     public ResponseEntity<?> activateUser(@RequestParam Long userId) {
         userService.activateUserById(userId);
         return new ResponseEntity<>("User account activated successfully!", HttpStatus.OK);
     }
 
-    @PutMapping("/deactivate-user")
+    @PatchMapping("/deactivate-user")
     public ResponseEntity<?> deactivateUser(@RequestParam Long userId) {
         userService.deactivateUserById(userId);
         return new ResponseEntity<>("User account successfully deactivated!", HttpStatus.OK);
@@ -94,7 +94,7 @@ public class AdminResource {
         return mappingJacksonValue;
     }
 
-    @PutMapping("/update-category")
+    @PatchMapping("/update-category")
     public ResponseEntity<String> updateCategory(@Valid @RequestBody UpdateCategoryDto updateCategoryDto) {
         adminService.updateCategory(updateCategoryDto);
         return new ResponseEntity<>("Updated Successfully!", HttpStatus.OK);
@@ -106,19 +106,19 @@ public class AdminResource {
         return new ResponseEntity<>("Added Successfully!", HttpStatus.OK);
     }
 
-    @PutMapping("/update-category-metadata-field-values")
+    @PatchMapping("/update-category-metadata-field-values")
     public ResponseEntity<String> updateCategoryMetadataFieldValues(@Valid @RequestBody CategoryMetadataFieldValuesDto createCategoryMetadataFieldValues) {
         adminService.updateCategoryMetadataFieldValues(createCategoryMetadataFieldValues);
         return new ResponseEntity<>("Updated Successfully!", HttpStatus.OK);
     }
 
-    @PutMapping("/activate-product/{productId}")
+    @PatchMapping("/activate-product/{productId}")
     public ResponseEntity<String> activateProduct(@PathVariable Long productId) {
         adminService.activateProduct(productId);
         return new ResponseEntity<>("Product activated Successfully!", HttpStatus.OK);
     }
 
-    @PutMapping("/deactivate-product/{productId}")
+    @PatchMapping("/deactivate-product/{productId}")
     public ResponseEntity<String> deactivateProduct(@PathVariable Long productId) {
         adminService.deactivateProduct(productId);
         return new ResponseEntity<>("Product deactivated Successfully!", HttpStatus.OK);

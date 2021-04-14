@@ -1,5 +1,7 @@
 package com.tothenew.security;
 
+import com.tothenew.exception.JWTAccessDeniedHandler;
+import com.tothenew.exception.JWTAuthenticationEntryPoint;
 import com.tothenew.jwt.JwtCofig;
 import com.tothenew.jwt.JwtTokenVerifier;
 import com.tothenew.jwt.JwtUsernameAndPasswordAuthenticationFilter;
@@ -29,10 +31,14 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
     private final LogoutTokenService logoutTokenService;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    LogoutSuccessHandler logoutSuccessHandler;
+    private LogoutSuccessHandler logoutSuccessHandler;
+    @Autowired
+    private JWTAccessDeniedHandler jwtAccessDeniedHandler;
+    @Autowired
+    private JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
 
     @Autowired
@@ -70,6 +76,9 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .exceptionHandling().accessDeniedHandler(jwtAccessDeniedHandler)
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .and()
                 .logout().logoutSuccessHandler(logoutSuccessHandler);
     }

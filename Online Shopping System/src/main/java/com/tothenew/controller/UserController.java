@@ -1,4 +1,4 @@
-package com.tothenew.resources;
+package com.tothenew.controller;
 
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
@@ -16,7 +16,7 @@ import javax.validation.Valid;
 
 
 @RestController
-public class UserResource {
+public class UserController {
 
     @Autowired
     private UserRepository userRepository;

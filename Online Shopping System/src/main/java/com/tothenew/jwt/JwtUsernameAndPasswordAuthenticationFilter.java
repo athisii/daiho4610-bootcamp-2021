@@ -8,6 +8,7 @@ import com.tothenew.objects.UsernameAndPasswordAuthenticationRequest;
 import com.tothenew.services.user.UserService;
 import io.jsonwebtoken.Jwts;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -94,7 +95,7 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
                 } else {
                     userService.lock(user);
                     userService.sendLockedMessage(user.getEmail());
-                    response1 = new ExceptionResponse(new Date(), "Bad Credentials", "Invalid Password. Your account has been locked due to 3 failed attempts. It will be unlocked after 24 hours.");
+                    response1 = new ExceptionResponse(new Date(), "Account Locked", "Your account has been locked due to 3 failed attempts. It will be unlocked after 24 hours.");
                 }
             } else if (!user.isAccountNonLocked()) {
                 if (userService.unlockWhenTimeExpired(user)) {
@@ -104,7 +105,9 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
             }
 
         }
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getWriter(), response1);
+
 
     }
 

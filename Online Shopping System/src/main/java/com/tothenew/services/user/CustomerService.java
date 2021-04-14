@@ -52,14 +52,16 @@ public class CustomerService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     public void registerNewCustomer(CustomerDto customerDto) throws EmailExistsException {
 
         if (checkIfEmailExists(customerDto.getEmail())) {
             throw new EmailExistsException("Email already registered");
         }
         Customer newCustomer = new Customer();
-        ModelMapper mm = new ModelMapper();
-        mm.map(customerDto, newCustomer);
+        modelMapper.map(customerDto, newCustomer);
         newCustomer.setPassword(passwordEncoder.encode(newCustomer.getPassword()));
         newCustomer.setContact(customerDto.getPhone().getValue());
         customerDto.getAddress().setUser(newCustomer);
@@ -122,7 +124,6 @@ public class CustomerService {
     public void updateProfile(String email, UpdateProfileDto updateProfileDto) {
 
         User user = userService.findUserByEmail(email);
-        ModelMapper modelMapper = new ModelMapper();
         modelMapper.map(updateProfileDto, user);
         userRepository.save(user);
     }
@@ -134,8 +135,7 @@ public class CustomerService {
     public void addAddress(String email, AddressDto addressDto) {
         User user = userService.findUserByEmail(email);
         Address address = new Address();
-        ModelMapper mm = new ModelMapper();
-        mm.map(addressDto, address);
+        modelMapper.map(addressDto, address);
         address.setUser(user);
         user.getAddresses().add(address);
         userRepository.save(user);
@@ -163,7 +163,7 @@ public class CustomerService {
     public Category getFilterDetailsOfACategory(Long categoryId) {
         Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
         categoryOptional.orElseThrow(() -> new CategoryExistException("Not found for category with id: " + categoryId));
-       return categoryOptional.get();
+        return categoryOptional.get();
     }
 
     public Product getProduct(Long productId) {

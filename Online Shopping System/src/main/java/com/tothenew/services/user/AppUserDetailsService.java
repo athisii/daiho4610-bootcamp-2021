@@ -1,6 +1,5 @@
 package com.tothenew.services.user;
 
-import com.tothenew.services.user.AppUserDaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.userdetails.UserDetails;

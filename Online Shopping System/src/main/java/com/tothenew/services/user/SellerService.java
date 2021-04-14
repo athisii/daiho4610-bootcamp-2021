@@ -52,6 +52,8 @@ public class SellerService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private ModelMapper modelMapper;
 
 
     public void registerNewSeller(SellerDto sellerDto)
@@ -62,8 +64,7 @@ public class SellerService {
         }
 
         Seller newSeller = new Seller();
-        ModelMapper mm = new ModelMapper();
-        mm.map(sellerDto, newSeller);
+        modelMapper.map(sellerDto, newSeller);
         newSeller.setPassword(passwordEncoder.encode(newSeller.getPassword()));
         newSeller.setCompanyContact(sellerDto.getPhone().getValue());
         sellerDto.getCompanyAddress().setUser(newSeller);
@@ -96,7 +97,6 @@ public class SellerService {
 
     public void updateProfile(String email, UpdateProfileDto updateProfileDto) {
         User user = userService.findUserByEmail(email);
-        ModelMapper modelMapper = new ModelMapper();
         modelMapper.map(updateProfileDto, user);
         userRepository.save(user);
     }
@@ -122,8 +122,7 @@ public class SellerService {
             throw new ProductExistException("Same product exists");
         }
         Product product = new Product();
-        ModelMapper mm = new ModelMapper();
-        mm.map(createProductDto, product);
+        modelMapper.map(createProductDto, product);
         product.setSeller(seller);
         product.setCategory(category);
         productRepository.save(product);
@@ -261,8 +260,7 @@ public class SellerService {
         Category category = product.getCategory();
         List<ProductVariationMetadataFieldValueDto> metadataFieldIdValues = updateProductVariationDto.getUpdateMetadata();
         validate(category, metadataFieldIdValues);
-        ModelMapper mm = new ModelMapper();
-        mm.map(updateProductVariationDto, productVariation);
+        modelMapper.map(updateProductVariationDto, productVariation);
         String metadata = buildMetadata(metadataFieldIdValues);
         productVariation.setMetadata(metadata);
         productVariationRepository.save(productVariation);
