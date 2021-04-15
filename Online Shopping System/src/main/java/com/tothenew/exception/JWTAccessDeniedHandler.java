@@ -17,7 +17,7 @@ import java.util.Date;
 public class JWTAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException e) throws IOException, ServletException {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), "Forbidden", "Forbidden");
+        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), "Forbidden", "Access Denied");
         response.setStatus(HttpStatus.FORBIDDEN.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getWriter(), exceptionResponse);

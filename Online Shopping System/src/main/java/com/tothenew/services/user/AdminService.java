@@ -148,7 +148,6 @@ public class AdminService {
             });
             category.getCategoryMetadataFieldValues().addAll(cmfvs);
             categoryMetadataFieldValuesRepository.saveAll(cmfvs);
-//            categoryRepository.save(category);
             return;
 
         }
@@ -172,29 +171,20 @@ public class AdminService {
 
     public void updateCategoryMetadataFieldValues(CategoryMetadataFieldValuesDto cmfvd) {
         Long categoryId = cmfvd.getCategoryId();
+        LinkedHashSet<MetadataFieldIdValue> mfIdVs = cmfvd.getMetadataFieldIdValues();
+        mfIdVs.forEach(mfIdv -> {
+            if (!checkIfCategoryMetadataFieldKeyExists(cmfvd.getCategoryId(), mfIdv.getMetadataFieldId())) {
+                throw new CategoryMetadataFieldException("Not found for Category Id: " + categoryId + " associated with MetadataField Id: " + mfIdv.getMetadataFieldId());
+            }
+        });
+        List<CategoryMetadataFieldValues> cmfvs = new ArrayList<>();
+        mfIdVs.forEach(mfIdV -> {
+            CategoryMetadataFieldValues cmfv = categoryMetadataFieldValuesRepository.findByKey(categoryId, mfIdV.getMetadataFieldId());
+            cmfv.setValue(mfIdV.getValue());
+            cmfvs.add(cmfv);
+        });
+        categoryMetadataFieldValuesRepository.saveAll(cmfvs);
 
-        if (checkIfCategoryIdExists(categoryId)) {
-            LinkedHashSet<MetadataFieldIdValue> mfIdVs = cmfvd.getMetadataFieldIdValues();
-
-            mfIdVs.forEach(mfIdv -> {
-                if (checkIfMetadataFieldIdIsEmpty(mfIdv.getMetadataFieldId())) {
-                    throw new CategoryMetadataFieldException("Not found Category Metadata Field with id: " + mfIdv.getMetadataFieldId());
-                }
-                if (!checkIfCategoryMetadataFieldKeyExists(cmfvd.getCategoryId(), mfIdv.getMetadataFieldId())) {
-                    throw new CategoryMetadataFieldException("Not found for Category Id: " + categoryId + " associated with MetadataField Id: " + mfIdv.getMetadataFieldId());
-                }
-            });
-            List<CategoryMetadataFieldValues> cmfvs = new ArrayList<>();
-            mfIdVs.forEach(mfIdV -> {
-                CategoryMetadataFieldValues cmfv = categoryMetadataFieldValuesRepository.findByKey(categoryId, mfIdV.getMetadataFieldId());
-                cmfv.setValue(mfIdV.getValue());
-                cmfvs.add(cmfv);
-            });
-            categoryMetadataFieldValuesRepository.saveAll(cmfvs);
-            return;
-
-        }
-        throw new CategoryExistException("Not Found for category with id: " + categoryId);
     }
 
     public void activateProduct(Long productId) {

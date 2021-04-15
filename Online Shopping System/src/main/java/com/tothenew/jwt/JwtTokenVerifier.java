@@ -67,11 +67,10 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email, null, roles);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (JwtException ex) {
+            } catch (JwtException ignored) {
             }
-            filterChain.doFilter(request, response);
         }
-        throw new InvalidTokenException("Invalid Token");
+        filterChain.doFilter(request, response);
     }
 
 

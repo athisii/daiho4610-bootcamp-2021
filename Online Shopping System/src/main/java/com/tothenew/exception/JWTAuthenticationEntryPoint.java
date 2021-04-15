@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Date;
 
 @Component
-public class JWTAuthenticationEntryPoint extends Http403ForbiddenEntryPoint {
+public class JWTAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException arg2) throws IOException {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), "Unauthorized Access!", "Unauthorized- Access Denied");

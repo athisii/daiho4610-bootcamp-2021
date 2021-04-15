@@ -1,17 +1,17 @@
 package com.tothenew.services.user;
 
+import com.tothenew.entities.cart.Cart;
 import com.tothenew.entities.product.Category;
 import com.tothenew.entities.product.ParentCategory;
 import com.tothenew.entities.product.Product;
+import com.tothenew.entities.product.ProductVariation;
 import com.tothenew.entities.token.VerificationToken;
 import com.tothenew.entities.user.*;
 import com.tothenew.exception.*;
 import com.tothenew.objects.*;
 import com.tothenew.repos.AddressRepository;
 import com.tothenew.repos.VerificationTokenRepository;
-import com.tothenew.repos.product.CategoryRepository;
-import com.tothenew.repos.product.ParentCategoryRepository;
-import com.tothenew.repos.product.ProductRepository;
+import com.tothenew.repos.product.*;
 import com.tothenew.repos.user.CustomerRepository;
 import com.tothenew.repos.user.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -51,6 +51,10 @@ public class CustomerService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private ProductVariationRepository productVariationRepository;
+    @Autowired
+    private CartRepository cartRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -213,5 +217,60 @@ public class CustomerService {
     }
 
 
+    public void addProductVariationToCart(Long productVariationId, int quantity, String email) {
+        if (quantity < 1) {
+            throw new ProductExistException("Quantity should be greater than 0");
+        }
+        Optional<ProductVariation> productVariationOptional = productVariationRepository.findById(productVariationId);
+        productVariationOptional.orElseThrow(() -> new ProductExistException("No Product Variation found with id: " + productVariationId));
+        ProductVariation productVariation = productVariationOptional.get();
+        Product product = productVariation.getProduct();
+        if (!productVariation.isActive() || product.isDeleted()) {
+            throw new ProductExistException("No Product found with id: " + productVariationId);
+        }
+        Customer customer = (Customer) userService.findUserByEmail(email);
+        Optional<Cart> cartOptional = cartRepository.findByKey(customer.getId(), productVariation.getId());
+        if (cartOptional.isPresent()) {
+            Cart cart = cartOptional.get();
+            cart.setQuantity(cart.getQuantity() + quantity);
+            cartRepository.save(cart);
+            return;
+        }
+        Cart cart = new Cart();
+        cart.setCustomer(customer);
+        cart.setProductVariation(productVariation);
+        cart.setQuantity(quantity);
+        cartRepository.save(cart);
+
+    }
+
+    public List<Cart> viewCart(String email) {
+        Customer customer = (Customer) userService.findUserByEmail(email);
+        return customer.getCarts();
+    }
+
+    public void deleteProductVariationInCart(Long productVariationId, String email) {
+        Customer customer = (Customer) userService.findUserByEmail(email);
+        Optional<Cart> cartOptional = cartRepository.findByKey(customer.getId(), productVariationId);
+        cartOptional.orElseThrow(() -> new ProductExistException("No product variation found in cart with id: " + productVariationId));
+        cartRepository.delete(cartOptional.get());
+    }
+
+    public void updateProductVariationInCart(Long productVariationId, int quantity, String email) {
+        if (quantity < 1) {
+            throw new ProductExistException("Quantity should be greater than 0");
+        }
+        Customer customer = (Customer) userService.findUserByEmail(email);
+        Optional<Cart> cartOptional = cartRepository.findByKey(customer.getId(), productVariationId);
+        cartOptional.orElseThrow(() -> new ProductExistException("No product variation found in cart with id: " + productVariationId));
+        Cart cart = cartOptional.get();
+        cart.setQuantity(quantity);
+        cartRepository.save(cart);
+    }
+
+    public void deleteAllProductsInCart(String email) {
+        Customer customer = (Customer) userService.findUserByEmail(email);
+        cartRepository.deleteByCustomerId(customer.getId());
+    }
 }
 

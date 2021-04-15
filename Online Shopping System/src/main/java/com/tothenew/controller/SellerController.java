@@ -28,13 +28,13 @@ public class SellerController {
     @PostMapping("/register/seller")
     public ResponseEntity<?> registerSeller(@Valid @RequestBody SellerDto sellerDto) {
         sellerService.registerNewSeller(sellerDto);
-        return new ResponseEntity<>("Your account has been created successfully, waiting for approval!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Your account has been created successfully, waiting for approval!"), HttpStatus.OK);
     }
 
     @PostMapping("/reset-password/seller")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody EmailDto emailDto) {
         sellerService.resendToken(emailDto);
-        return new ResponseEntity<>("Link to reset the password has been sent.", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Link to reset the password has been sent."), HttpStatus.OK);
     }
 
     @GetMapping("/seller/profile")
@@ -52,50 +52,50 @@ public class SellerController {
     @PatchMapping("/seller/profile")
     public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateProfileDto updateProfileDto, Principal principal) {
         sellerService.updateProfile(principal.getName(), updateProfileDto);
-        return new ResponseEntity<>("Profile updated successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Profile updated successfully!"), HttpStatus.OK);
     }
 
     @PatchMapping("/seller/update-password")
-    public ResponseEntity<String> updatePassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto, Principal principal) {
+    public ResponseEntity<?> updatePassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto, Principal principal) {
         sellerService.updatePassword(principal.getName(), resetPasswordDto);
-        return new ResponseEntity<>("Password updated successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Password updated successfully!"), HttpStatus.OK);
     }
 
-    @PatchMapping("/seller/update-address")
-    public ResponseEntity<String> updateAddress(@Valid @RequestBody AddressDto addressDto, @RequestParam Long addressId) {
+    @PatchMapping("/seller/address")
+    public ResponseEntity<?> updateAddress(@Valid @RequestBody AddressDto addressDto, @RequestParam Long addressId) {
         sellerService.updateAddress(addressDto, addressId);
-        return new ResponseEntity<>("Address updated successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Address updated successfully!"), HttpStatus.OK);
     }
 
 
-    @PostMapping("/seller/add-product")
-    public ResponseEntity<String> createProduct(@Valid @RequestBody CreateProductDto createProductDto, Principal principal) {
+    @PostMapping("/seller/product")
+    public ResponseEntity<?> createProduct(@Valid @RequestBody CreateProductDto createProductDto, Principal principal) {
         sellerService.addProduct(createProductDto, principal.getName());
-        return new ResponseEntity<>("Product added successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Product added successfully!"), HttpStatus.OK);
     }
 
-    @PatchMapping("/seller/update-product")
-    public ResponseEntity<String> updateProduct(@Valid @RequestBody UpdateProductDto updateProductDto, Principal principal) {
+    @PatchMapping("/seller/product")
+    public ResponseEntity<?> updateProduct(@Valid @RequestBody UpdateProductDto updateProductDto, Principal principal) {
         sellerService.updateProduct(updateProductDto, principal.getName());
-        return new ResponseEntity<>("Product updated successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Product updated successfully!"), HttpStatus.OK);
     }
 
-    @PostMapping("/seller/add-product-variation")
-    public ResponseEntity<String> addProductVariation(@Valid @RequestBody CreateProductVariationDto createProductVariationDto, Principal principal) {
+    @PostMapping("/seller/product-variation")
+    public ResponseEntity<?> addProductVariation(@Valid @RequestBody CreateProductVariationDto createProductVariationDto, Principal principal) {
         sellerService.addProductVariation(createProductVariationDto, principal.getName());
-        return new ResponseEntity<>("Product Variation added successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Product Variation added successfully!"), HttpStatus.OK);
     }
 
-    @PatchMapping("/seller/update-product-variation")
-    public ResponseEntity<String> updateProductVariation(@Valid @RequestBody UpdateProductVariationDto updateProductVariationDto, Principal principal) {
+    @PatchMapping("/seller/product-variation")
+    public ResponseEntity<?> updateProductVariation(@Valid @RequestBody UpdateProductVariationDto updateProductVariationDto, Principal principal) {
         sellerService.updateProductVariation(updateProductVariationDto, principal.getName());
-        return new ResponseEntity<>("Product Variation updated successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Product Variation updated successfully!"), HttpStatus.OK);
     }
 
-    @DeleteMapping("/seller/delete-product/{productId}")
-    public ResponseEntity<String> deleteProduct(Principal principal, @PathVariable Long productId) {
+    @DeleteMapping("/seller/product/{productId}")
+    public ResponseEntity<?> deleteProduct(Principal principal, @PathVariable Long productId) {
         sellerService.deleteProduct(principal.getName(), productId);
-        return new ResponseEntity<>("Product deleted successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Product deleted successfully!"), HttpStatus.OK);
     }
 
 

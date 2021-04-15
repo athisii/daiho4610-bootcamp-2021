@@ -138,7 +138,6 @@ public class SellerService {
     public Page<Product> getAllProducts(Pageable pageable, String email) {
         Seller seller = (Seller) userService.findUserByEmail(email);
         return productRepository.findBySellerId(seller.getId(), pageable);
-//        return seller.getProducts();
     }
 
     public Product getProductById(String email, Long productId) {

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.tothenew.entities.product.CategoryMetadataField;
 import com.tothenew.objects.CategoryMetadataFieldDto;
 import com.tothenew.objects.CreateCategoryDto;
+import com.tothenew.objects.SuccessResponse;
 import com.tothenew.objects.UpdateCategoryDto;
 import com.tothenew.objects.categorymetadata.CategoryMetadataFieldValuesDto;
 import com.tothenew.services.user.AdminService;
@@ -52,16 +53,16 @@ public class AdminController {
 
     }
 
-    @PatchMapping("/activate-user")
-    public ResponseEntity<?> activateUser(@RequestParam Long userId) {
+    @PatchMapping("/activate-user/{userId}")
+    public ResponseEntity<?> activateUser(@PathVariable Long userId) {
         userService.activateUserById(userId);
-        return new ResponseEntity<>("User account activated successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("User account activated successfully!"), HttpStatus.OK);
     }
 
-    @PatchMapping("/deactivate-user")
-    public ResponseEntity<?> deactivateUser(@RequestParam Long userId) {
+    @PatchMapping("/deactivate-user/{userId}")
+    public ResponseEntity<?> deactivateUser(@PathVariable Long userId) {
         userService.deactivateUserById(userId);
-        return new ResponseEntity<>("User account successfully deactivated!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("User account successfully deactivated!"), HttpStatus.OK);
     }
 
     @GetMapping("/metadata-field")
@@ -69,16 +70,16 @@ public class AdminController {
         return adminService.getAllCategoryMetadataFields(pageable);
     }
 
-    @PostMapping("/add-metadata-field")
-    public ResponseEntity<String> createMetadataField(@Valid @RequestBody CategoryMetadataFieldDto categoryMetadataFieldDto) {
+    @PostMapping("/metadata-field")
+    public ResponseEntity<?> createMetadataField(@Valid @RequestBody CategoryMetadataFieldDto categoryMetadataFieldDto) {
         Long id = adminService.addMetadataField(categoryMetadataFieldDto);
-        return new ResponseEntity<>("New Metadata Field Added Successfully with id: " + id, HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("New Metadata Field Added Successfully with id: " + id), HttpStatus.OK);
     }
 
-    @PostMapping("/add-category")
-    public ResponseEntity<String> createCategory(@Valid @RequestBody CreateCategoryDto categoryDto) {
+    @PostMapping("/category")
+    public ResponseEntity<?> createCategory(@Valid @RequestBody CreateCategoryDto categoryDto) {
         Long id = adminService.addCategory(categoryDto);
-        return new ResponseEntity<>("New Category Added Successfully with id: " + id, HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("New Category Added Successfully with id: " + id), HttpStatus.OK);
 
     }
 
@@ -94,34 +95,34 @@ public class AdminController {
         return mappingJacksonValue;
     }
 
-    @PatchMapping("/update-category")
-    public ResponseEntity<String> updateCategory(@Valid @RequestBody UpdateCategoryDto updateCategoryDto) {
+    @PatchMapping("/category")
+    public ResponseEntity<?> updateCategory(@Valid @RequestBody UpdateCategoryDto updateCategoryDto) {
         adminService.updateCategory(updateCategoryDto);
-        return new ResponseEntity<>("Updated Successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Updated Successfully!"), HttpStatus.OK);
     }
 
-    @PostMapping("/add-category-metadata-field-values")
-    public ResponseEntity<String> createCategoryMetadataFieldValues(@Valid @RequestBody CategoryMetadataFieldValuesDto createCategoryMetadataFieldValues) {
+    @PostMapping("/category-metadata-field-values")
+    public ResponseEntity<?> createCategoryMetadataFieldValues(@Valid @RequestBody CategoryMetadataFieldValuesDto createCategoryMetadataFieldValues) {
         adminService.addCategoryMetadataFieldValues(createCategoryMetadataFieldValues);
-        return new ResponseEntity<>("Added Successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Added Successfully!"), HttpStatus.OK);
     }
 
-    @PatchMapping("/update-category-metadata-field-values")
-    public ResponseEntity<String> updateCategoryMetadataFieldValues(@Valid @RequestBody CategoryMetadataFieldValuesDto createCategoryMetadataFieldValues) {
+    @PatchMapping("/category-metadata-field-values")
+    public ResponseEntity<?> updateCategoryMetadataFieldValues(@Valid @RequestBody CategoryMetadataFieldValuesDto createCategoryMetadataFieldValues) {
         adminService.updateCategoryMetadataFieldValues(createCategoryMetadataFieldValues);
-        return new ResponseEntity<>("Updated Successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Updated Successfully!"), HttpStatus.OK);
     }
 
     @PatchMapping("/activate-product/{productId}")
-    public ResponseEntity<String> activateProduct(@PathVariable Long productId) {
+    public ResponseEntity<?> activateProduct(@PathVariable Long productId) {
         adminService.activateProduct(productId);
-        return new ResponseEntity<>("Product activated Successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Product activated Successfully!"), HttpStatus.OK);
     }
 
     @PatchMapping("/deactivate-product/{productId}")
-    public ResponseEntity<String> deactivateProduct(@PathVariable Long productId) {
+    public ResponseEntity<?> deactivateProduct(@PathVariable Long productId) {
         adminService.deactivateProduct(productId);
-        return new ResponseEntity<>("Product deactivated Successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Product deactivated Successfully!"), HttpStatus.OK);
     }
 
     @GetMapping("/product/{productId}")

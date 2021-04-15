@@ -27,61 +27,32 @@ public class CustomerController {
     @PostMapping("/register/customer")
     public ResponseEntity<Object> registerCustomer(@Valid @RequestBody CustomerDto customerDto) {
         customerService.registerNewCustomer(customerDto);
-        return new ResponseEntity<>("Your account has been created successfully, please check your email for activation.", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Your account has been created successfully, please check your email for activation."), HttpStatus.OK);
     }
 
     @PatchMapping("/register/customer/confirm-account")
     public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token) {
         customerService.confirmRegisteredCustomer(token);
-        return new ResponseEntity<>("Your account has been verified successfully! You can now log in.", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Your account has been verified successfully! You can now log in."), HttpStatus.OK);
     }
 
     @PostMapping("/register/customer/resend-token")
     public ResponseEntity<?> resendRegistrationToken(@Valid @RequestBody EmailDto emailDto) {
         customerService.resendToken(emailDto);
-        return new ResponseEntity<>("Activation link has been resent.", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Activation link has been resent."), HttpStatus.OK);
     }
 
     @PostMapping("/reset-password/customer")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody EmailDto emailDto) {
         customerService.resetPassword(emailDto);
-        return new ResponseEntity<>("Link to reset the password has been sent.", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Link to reset the password has been sent."), HttpStatus.OK);
     }
 
 
     @PatchMapping("/customer/profile")
     public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateProfileDto updateProfileDto, Principal principal) {
         customerService.updateProfile(principal.getName(), updateProfileDto);
-        return new ResponseEntity<>("Profile updated successfully!", HttpStatus.OK);
-    }
-
-    @GetMapping("/customer/address")
-    public List<Address> addresses(Principal principal) {
-        return customerService.addresses(principal.getName());
-    }
-
-    @PostMapping("/customer/add-address")
-    public ResponseEntity<String> addAddress(@Valid @RequestBody AddressDto addressDto, Principal principal) {
-        customerService.addAddress(principal.getName(), addressDto);
-        return new ResponseEntity<>("Address added successfully!", HttpStatus.OK);
-    }
-
-    @DeleteMapping("/customer/delete-address")
-    public ResponseEntity<String> removeAddress(@RequestParam Long addressId) {
-        customerService.deleteAddress(addressId);
-        return new ResponseEntity<>("Address deleted successfully!", HttpStatus.OK);
-    }
-
-    @PatchMapping("/customer/update-address")
-    public ResponseEntity<String> updateAddress(@Valid @RequestBody AddressDto addressDto, @RequestParam Long addressId) {
-        customerService.updateAddress(addressDto, addressId);
-        return new ResponseEntity<>("Address updated successfully!", HttpStatus.OK);
-    }
-
-    @PatchMapping("/customer/update-password")
-    public ResponseEntity<String> updatePassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto, Principal principal) {
-        customerService.updatePassword(principal.getName(), resetPasswordDto);
-        return new ResponseEntity<>("Password updated successfully!", HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse("Profile updated successfully!"), HttpStatus.OK);
     }
 
     @GetMapping("/customer/profile")
@@ -90,6 +61,35 @@ public class CustomerController {
         SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "firstName", "lastName", "imageUrl", "contact", "active");
         mappingJacksonValue.setFilters(filter(filter));
         return mappingJacksonValue;
+    }
+
+    @GetMapping("/customer/address")
+    public List<Address> addresses(Principal principal) {
+        return customerService.addresses(principal.getName());
+    }
+
+    @PostMapping("/customer/address")
+    public ResponseEntity<?> addAddress(@Valid @RequestBody AddressDto addressDto, Principal principal) {
+        customerService.addAddress(principal.getName(), addressDto);
+        return new ResponseEntity<>(new SuccessResponse("Address added successfully!"), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/customer/address/{addressId}")
+    public ResponseEntity<?> removeAddress(@PathVariable Long addressId) {
+        customerService.deleteAddress(addressId);
+        return new ResponseEntity<>(new SuccessResponse("Address deleted successfully!"), HttpStatus.OK);
+    }
+
+    @PatchMapping("/customer/address/{addressId}")
+    public ResponseEntity<?> updateAddress(@Valid @RequestBody AddressDto addressDto, @PathVariable Long addressId) {
+        customerService.updateAddress(addressDto, addressId);
+        return new ResponseEntity<>(new SuccessResponse("Address updated successfully!"), HttpStatus.OK);
+    }
+
+    @PatchMapping("/customer/update-password")
+    public ResponseEntity<?> updatePassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto, Principal principal) {
+        customerService.updatePassword(principal.getName(), resetPasswordDto);
+        return new ResponseEntity<>(new SuccessResponse("Password updated successfully!"), HttpStatus.OK);
     }
 
     private FilterProvider filter(SimpleBeanPropertyFilter filter) {
@@ -151,16 +151,56 @@ public class CustomerController {
     }
 
     private MappingJacksonValue addFilter(MappingJacksonValue mappingJacksonValue) {
-        var filter1 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "brand", "active", "returnable", "description", "cancelable", "category", "productVariations");
-        var filter2 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name");
-        var filter3 = SimpleBeanPropertyFilter.filterOutAllExcept("id", "quantityAvailable", "price", "primaryImageName", "active", "metadata");
-        SimpleFilterProvider categoryFilter = new SimpleFilterProvider()
-                .addFilter("productFilter", filter1)
-                .addFilter("categoryFilter", filter2)
-                .addFilter("productVariationFilter", filter3);
-        mappingJacksonValue.setFilters(categoryFilter);
+        var productFilter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "brand", "active", "returnable", "description", "cancelable", "category", "productVariations");
+        var categoryFilter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name");
+        var productVariationFilter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "quantityAvailable", "price", "primaryImageName", "active", "metadata");
+        SimpleFilterProvider categoryFilterProvide = new SimpleFilterProvider()
+                .addFilter("productFilter", productFilter)
+                .addFilter("categoryFilter", categoryFilter)
+                .addFilter("productVariationFilter", productVariationFilter);
+        mappingJacksonValue.setFilters(categoryFilterProvide);
         return mappingJacksonValue;
     }
 
+    @PostMapping("/customer/cart")
+    public ResponseEntity<?> addProductToCart(@RequestParam("productVariationId") Long productVariationId,
+                                              @RequestParam("quantity") int quantity, Principal principal) {
+        customerService.addProductVariationToCart(productVariationId, quantity, principal.getName());
+        return new ResponseEntity<>(new SuccessResponse("Product added to cart successfully!"), HttpStatus.OK);
+
+    }
+
+    @GetMapping("/customer/cart")
+    public MappingJacksonValue viewCart(Principal principal) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.viewCart(principal.getName()));
+        var cartFilter = SimpleBeanPropertyFilter.filterOutAllExcept("productVariation", "quantity");
+        SimpleBeanPropertyFilter productVariationFilter = SimpleBeanPropertyFilter.filterOutAllExcept("price", "active", "metadata", "product");
+        SimpleBeanPropertyFilter productFilter = SimpleBeanPropertyFilter.filterOutAllExcept("name");
+        SimpleFilterProvider filters = new SimpleFilterProvider()
+                .addFilter("cartFilter", cartFilter)
+                .addFilter("productVariationFilter", productVariationFilter)
+                .addFilter("productFilter", productFilter);
+        mappingJacksonValue.setFilters(filters);
+        return mappingJacksonValue;
+    }
+
+    @DeleteMapping("/customer/cart/{productVariationId}")
+    public ResponseEntity<?> deleteProductInCart(@PathVariable Long productVariationId, Principal principal) {
+        customerService.deleteProductVariationInCart(productVariationId, principal.getName());
+        return new ResponseEntity<>(new SuccessResponse("Product deleted from cart successfully!"), HttpStatus.OK);
+    }
+
+    @PutMapping("/customer/cart")
+    public ResponseEntity<?> updateProductInCart(@RequestParam("productVariationId") Long productVariationId,
+                                                 @RequestParam("quantity") int quantity, Principal principal) {
+        customerService.updateProductVariationInCart(productVariationId, quantity, principal.getName());
+        return new ResponseEntity<>(new SuccessResponse("Product updated successfully!"), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/customer/cart")
+    public ResponseEntity<?> deleteAllProductsInCart(Principal principal) {
+        customerService.deleteAllProductsInCart(principal.getName());
+        return new ResponseEntity<>(new SuccessResponse("All products in cart deleted successfully!"), HttpStatus.OK);
+    }
 
 }

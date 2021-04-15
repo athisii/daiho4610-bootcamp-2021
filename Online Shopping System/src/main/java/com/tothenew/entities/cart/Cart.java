@@ -1,5 +1,6 @@
 package com.tothenew.entities.cart;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.tothenew.entities.product.ProductVariation;
 import com.tothenew.entities.user.Customer;
 import lombok.*;
@@ -11,6 +12,7 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonFilter("cartFilter")
 public class Cart {
     @EmbeddedId
     private CustomerProductVariationKey customerProductVariationKey = new CustomerProductVariationKey();
