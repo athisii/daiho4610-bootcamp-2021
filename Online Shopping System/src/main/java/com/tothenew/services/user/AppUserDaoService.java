@@ -31,7 +31,7 @@ public class AppUserDaoService implements AppUserDao {
         User user = userRepository.findByEmail(email);
         if (user != null) {
             Set<SimpleGrantedAuthority> grantAuthorityList = new HashSet<>();
-            user.getRoles().forEach(role -> grantAuthorityList.add(new SimpleGrantedAuthority(role.getAuthority())));
+            user.getRoles().forEach(role -> grantAuthorityList.add(new SimpleGrantedAuthority(role.getAuthority().getRole())));
             return new AppUserDetails(user.getEmail(), user.getPassword(), user.isActive(), user.isAccountNonLocked(), grantAuthorityList);
         } else {
             throw new UsernameNotFoundException("No such user found");

@@ -3,6 +3,7 @@ package com.tothenew.objects.product;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -11,8 +12,9 @@ import java.util.List;
 public class UpdateProductVariationDto {
     @NotNull
     private Long productVariationId;
-    private Integer quantityAvailable;
-    private Integer price;
+    private int quantityAvailable;
+    @Min(0)
+    private int price;
     private String primaryImageName;
     private List<String> secondaryImages;
     private boolean isActive;

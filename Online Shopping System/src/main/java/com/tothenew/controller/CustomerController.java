@@ -203,4 +203,10 @@ public class CustomerController {
         return new ResponseEntity<>(new SuccessResponse("All products in cart deleted successfully!"), HttpStatus.OK);
     }
 
+    @PostMapping("/customer/order")
+    public ResponseEntity<?> orderProduct(Principal principal) {
+        Long orderId = customerService.orderProduct(principal.getName());
+        return new ResponseEntity<>(new SuccessResponse("Order placed successfully with order id: " + orderId), HttpStatus.OK);
+    }
+
 }

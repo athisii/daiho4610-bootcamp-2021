@@ -1,9 +1,14 @@
 package com.tothenew;
 
-import com.tothenew.entities.product.*;
+import com.tothenew.entities.product.Category;
+import com.tothenew.entities.product.CategoryMetadataField;
+import com.tothenew.entities.product.CategoryMetadataFieldValues;
+import com.tothenew.entities.product.ParentCategory;
 import com.tothenew.entities.user.*;
 import com.tothenew.repos.RoleRepository;
-import com.tothenew.repos.product.*;
+import com.tothenew.repos.product.CategoryMetadataFieldRepository;
+import com.tothenew.repos.product.CategoryMetadataFieldValuesRepository;
+import com.tothenew.repos.product.ParentCategoryRepository;
 import com.tothenew.repos.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -32,9 +37,7 @@ public class Bootstrap implements ApplicationRunner {
 
     @Autowired
     private CategoryMetadataFieldValuesRepository categoryMetadataFieldValuesRepository;
-
-    @Autowired
-    private ProductVariationRepository productVariationRepository;
+    
 
 
     @Transactional
@@ -44,11 +47,9 @@ public class Bootstrap implements ApplicationRunner {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 
-            Role role_admin = new Role("ROLE_ADMIN");
-
-            Role role_seller = new Role("ROLE_SELLER");
-
-            Role role_customer = new Role("ROLE_CUSTOMER");
+            Role role_admin = new Role(UserRole.ADMIN);
+            Role role_seller = new Role(UserRole.SELLER);
+            Role role_customer = new Role(UserRole.CUSTOMER);
             roleRepository.saveAll(List.of(role_admin, role_seller, role_customer));
 
             User admin = new Admin();

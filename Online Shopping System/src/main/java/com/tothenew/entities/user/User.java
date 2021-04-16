@@ -42,7 +42,8 @@ public class User {
     private Date createdDate;
     @LastModifiedDate
     private Date modifiedDate;
-
+    //ManyToMany fetch type ->Lazy by default
+    //OneToOne fetch type-> Eager by default
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),

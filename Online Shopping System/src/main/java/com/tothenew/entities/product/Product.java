@@ -30,7 +30,7 @@ public class Product {
     private String description;
     private boolean isCancelable;
     private boolean isReturnable;
-    private boolean isActive;
+    private boolean isActive = true;
     private boolean isDeleted;
     @CreatedDate
     private Date createdDate;

@@ -126,7 +126,7 @@ public class SellerService {
         product.setSeller(seller);
         product.setCategory(category);
         productRepository.save(product);
-        userService.sendProductActivationMessage(product);
+//        userService.sendProductActivationMessage(product);
     }
 
 

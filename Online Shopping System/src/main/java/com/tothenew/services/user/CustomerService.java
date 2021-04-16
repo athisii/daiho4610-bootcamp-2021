@@ -1,6 +1,8 @@
 package com.tothenew.services.user;
 
 import com.tothenew.entities.cart.Cart;
+import com.tothenew.entities.order.Order;
+import com.tothenew.entities.order.OrderProduct;
 import com.tothenew.entities.product.Category;
 import com.tothenew.entities.product.ParentCategory;
 import com.tothenew.entities.product.Product;
@@ -10,6 +12,7 @@ import com.tothenew.entities.user.*;
 import com.tothenew.exception.*;
 import com.tothenew.objects.*;
 import com.tothenew.repos.AddressRepository;
+import com.tothenew.repos.OrderRepository;
 import com.tothenew.repos.VerificationTokenRepository;
 import com.tothenew.repos.product.*;
 import com.tothenew.repos.user.CustomerRepository;
@@ -20,8 +23,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,6 +60,8 @@ public class CustomerService {
     private ProductVariationRepository productVariationRepository;
     @Autowired
     private CartRepository cartRepository;
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -225,14 +232,19 @@ public class CustomerService {
         productVariationOptional.orElseThrow(() -> new ProductExistException("No Product Variation found with id: " + productVariationId));
         ProductVariation productVariation = productVariationOptional.get();
         Product product = productVariation.getProduct();
-        if (!productVariation.isActive() || product.isDeleted()) {
-            throw new ProductExistException("No Product found with id: " + productVariationId);
+        if (!productVariation.isActive() || product.isDeleted() || !product.isActive()) {
+            throw new ProductExistException("Product/ProductVariation id: " + (productVariation.isActive() ? product.getId() : productVariation.getId()) + " is either deleted or not active!");
         }
         Customer customer = (Customer) userService.findUserByEmail(email);
         Optional<Cart> cartOptional = cartRepository.findByKey(customer.getId(), productVariation.getId());
         if (cartOptional.isPresent()) {
             Cart cart = cartOptional.get();
-            cart.setQuantity(cart.getQuantity() + quantity);
+            int totalQuantity = cart.getQuantity() + quantity;
+            int quantityAvailable = productVariation.getQuantityAvailable();
+            if (totalQuantity >= quantityAvailable) {
+                totalQuantity = quantityAvailable;
+            }
+            cart.setQuantity(totalQuantity);
             cartRepository.save(cart);
             return;
         }
@@ -264,6 +276,10 @@ public class CustomerService {
         Optional<Cart> cartOptional = cartRepository.findByKey(customer.getId(), productVariationId);
         cartOptional.orElseThrow(() -> new ProductExistException("No product variation found in cart with id: " + productVariationId));
         Cart cart = cartOptional.get();
+        int quantityAvailable = cart.getProductVariation().getQuantityAvailable();
+        if (quantity >= quantityAvailable) {
+            quantity = quantityAvailable;
+        }
         cart.setQuantity(quantity);
         cartRepository.save(cart);
     }
@@ -271,6 +287,52 @@ public class CustomerService {
     public void deleteAllProductsInCart(String email) {
         Customer customer = (Customer) userService.findUserByEmail(email);
         cartRepository.deleteByCustomerId(customer.getId());
+    }
+
+    public Long orderProduct(String email) {
+        Customer customer = (Customer) userService.findUserByEmail(email);
+        Address customerAddress = customer.getAddresses().get(0);
+        Order order = new Order();
+        order.setCustomer(customer);
+        AtomicInteger totalAmount = new AtomicInteger();
+        List<OrderProduct> orderProducts = new ArrayList<>();
+        List<Cart> carts = customer.getCarts();
+        if (carts.isEmpty()) {
+            throw new ProductExistException("Cart is empty");
+        }
+        carts.forEach(cart -> {
+            ProductVariation productVariation = cart.getProductVariation();
+            int quantity = cart.getQuantity();
+            if (quantity > productVariation.getQuantityAvailable()) {
+                throw new ProductExistException("Quantity should not exceed available quantity");
+            }
+            Product product = productVariation.getProduct();
+            if (!productVariation.isActive() || product.isDeleted() || !product.isActive()) {
+                throw new ProductExistException("Product/ProductVariation id: " + (productVariation.isActive() ? product.getId() : productVariation.getId()) + " is either deleted or not active!");
+            }
+            OrderProduct newOrderProduct = new OrderProduct();
+            newOrderProduct.setOrder(order);
+            int price = productVariation.getPrice() * quantity;
+            //amountPaid for order
+            totalAmount.addAndGet(price);
+            newOrderProduct.setPrice(price);
+            newOrderProduct.setProductVariation(productVariation);
+            newOrderProduct.setOrder(order);
+            newOrderProduct.setProductVariationMetadata(productVariation.getMetadata());
+            newOrderProduct.setQuantity(quantity);
+            orderProducts.add(newOrderProduct);
+        });
+        order.setAmountPaid(totalAmount.get());
+        order.setCustomerAddressCity(customerAddress.getCity());
+        order.setCustomerAddressCountry(customerAddress.getCountry());
+        order.setCustomerAddressState(customerAddress.getState());
+        order.setCustomerAddressLabel(customerAddress.getLabel());
+        order.setCustomerAddressZipCode(customerAddress.getZipCode());
+        order.setCustomerAddressAddressLine(customerAddress.getAddressLine());
+        order.getOrderProducts().addAll(orderProducts);
+        orderRepository.save(order);
+        deleteAllProductsInCart(email);
+        return order.getId();
     }
 }
 

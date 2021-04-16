@@ -20,12 +20,12 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String authority;
+    private UserRole authority;
 
     @ManyToMany(mappedBy = "roles", cascade = CascadeType.ALL)
     List<User> users = new ArrayList<>();
 
-    public Role(String authority) {
+    public Role(UserRole authority) {
         this.authority = authority;
     }
 }

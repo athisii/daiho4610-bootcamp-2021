@@ -3,6 +3,7 @@ package com.tothenew.objects.product;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -15,6 +16,7 @@ public class CreateProductVariationDto {
     @NotNull
     private Integer quantityAvailable;
     @NotNull
+    @Min(0)
     private Integer price;
     @NotNull
     @NotEmpty
