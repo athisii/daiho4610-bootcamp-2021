@@ -32,6 +32,7 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
+
     @GetMapping("/customer")
     public MappingJacksonValue profile(Pageable pageable) {
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getAllCustomers(pageable));
@@ -149,5 +150,16 @@ public class AdminController {
         return mappingJacksonValue;
     }
 
+    @GetMapping("/order")
+    public MappingJacksonValue retrieveAllOrders(@PageableDefault(sort = "id") Pageable pageable) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(adminService.getAllOrders(pageable));
+        SimpleFilterProvider filterProvider = new SimpleFilterProvider();
+        SimpleBeanPropertyFilter orderFilter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "orderProducts");
+        SimpleBeanPropertyFilter orderProductFilter = SimpleBeanPropertyFilter.filterOutAllExcept("id");
+        filterProvider.addFilter("orderFilter", orderFilter)
+                .addFilter("orderProductFilter", orderProductFilter);
 
+        mappingJacksonValue.setFilters(filterProvider);
+        return mappingJacksonValue;
+    }
 }

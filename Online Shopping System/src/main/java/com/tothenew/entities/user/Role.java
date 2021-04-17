@@ -1,7 +1,6 @@
 package com.tothenew.entities.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,6 +19,8 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
     private UserRole authority;
 
     @ManyToMany(mappedBy = "roles", cascade = CascadeType.ALL)

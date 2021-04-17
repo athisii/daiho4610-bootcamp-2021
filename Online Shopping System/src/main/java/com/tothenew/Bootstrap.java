@@ -1,11 +1,15 @@
 package com.tothenew;
 
+import com.tothenew.entities.order.FromStatus;
+import com.tothenew.entities.order.ToStatus;
 import com.tothenew.entities.product.Category;
 import com.tothenew.entities.product.CategoryMetadataField;
 import com.tothenew.entities.product.CategoryMetadataFieldValues;
 import com.tothenew.entities.product.ParentCategory;
 import com.tothenew.entities.user.*;
 import com.tothenew.repos.RoleRepository;
+import com.tothenew.repos.order.FromStatusRepository;
+import com.tothenew.repos.order.ToStatusRepository;
 import com.tothenew.repos.product.CategoryMetadataFieldRepository;
 import com.tothenew.repos.product.CategoryMetadataFieldValuesRepository;
 import com.tothenew.repos.product.ParentCategoryRepository;
@@ -18,7 +22,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class Bootstrap implements ApplicationRunner {
@@ -37,7 +44,12 @@ public class Bootstrap implements ApplicationRunner {
 
     @Autowired
     private CategoryMetadataFieldValuesRepository categoryMetadataFieldValuesRepository;
-    
+
+    @Autowired
+    private FromStatusRepository fromStatusRepository;
+
+    @Autowired
+    private ToStatusRepository toStatusRepository;
 
 
     @Transactional
@@ -51,6 +63,18 @@ public class Bootstrap implements ApplicationRunner {
             Role role_seller = new Role(UserRole.SELLER);
             Role role_customer = new Role(UserRole.CUSTOMER);
             roleRepository.saveAll(List.of(role_admin, role_seller, role_customer));
+
+
+            var fromStatusValues = com.tothenew.entities.order.orderstatusenum.FromStatus.values();
+            List<FromStatus> fromStatuses = new ArrayList<>();
+            Arrays.stream(fromStatusValues).forEach(value -> fromStatuses.add(new FromStatus(value.name())));
+            fromStatusRepository.saveAll(fromStatuses);
+
+            var toStatusValues = com.tothenew.entities.order.orderstatusenum.ToStatus.values();
+            List<ToStatus> toStatuses = new ArrayList<>();
+            Arrays.stream(toStatusValues).forEach(value -> toStatuses.add(new ToStatus(value.name())));
+            toStatusRepository.saveAll(toStatuses);
+
 
             User admin = new Admin();
             admin.setEmail("admin@tothenew.com");

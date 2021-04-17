@@ -8,6 +8,8 @@ import com.tothenew.entities.user.Address;
 import com.tothenew.objects.*;
 import com.tothenew.services.user.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -199,14 +201,48 @@ public class CustomerController {
 
     @DeleteMapping("/customer/cart")
     public ResponseEntity<?> deleteAllProductsInCart(Principal principal) {
-        customerService.deleteAllProductsInCart(principal.getName());
+        customerService.deleteCart(principal.getName());
         return new ResponseEntity<>(new SuccessResponse("All products in cart deleted successfully!"), HttpStatus.OK);
     }
 
     @PostMapping("/customer/order")
-    public ResponseEntity<?> orderProduct(Principal principal) {
-        Long orderId = customerService.orderProduct(principal.getName());
-        return new ResponseEntity<>(new SuccessResponse("Order placed successfully with order id: " + orderId), HttpStatus.OK);
+    public ResponseEntity<?> orderProducts(@RequestParam(name = "productVariationIds", required = false) List<Long> productVariationIds,
+                                           @RequestParam(name = "quantity", required = false) Integer quantity,
+                                           Principal principal) {
+        Long orderId;
+        if (productVariationIds == null && quantity == null) {
+            orderId = customerService.orderAllProducts(principal.getName());
+            return new ResponseEntity<>(new SuccessResponse("Order placed successfully with order id: " + orderId), HttpStatus.OK);
+        }
+        if (productVariationIds != null && quantity == null) {
+            orderId = customerService.orderPartialProducts(principal.getName(), productVariationIds);
+            return new ResponseEntity<>(new SuccessResponse("Order placed successfully with order id: " + orderId), HttpStatus.OK);
+        }
+        //Now quantity is always not null
+        if (productVariationIds != null && productVariationIds.size() == 1) {
+            orderId = customerService.directOrder(principal.getName(), productVariationIds.get(0), quantity);
+            return new ResponseEntity<>(new SuccessResponse("Order placed successfully with order id: " + orderId), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(new SuccessResponse("Something is wrong in your request parameter"), HttpStatus.NOT_FOUND);
     }
 
+    @GetMapping("/customer/order")
+    public MappingJacksonValue retrieveAllOrders(@PageableDefault(sort = "id") Pageable pageable, Principal principal) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.getAllOrders(principal.getName(), pageable));
+        SimpleFilterProvider filterProvider = new SimpleFilterProvider();
+        SimpleBeanPropertyFilter orderFilter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "createdDate", "amountPaid");
+        filterProvider.addFilter("orderFilter", orderFilter);
+        mappingJacksonValue.setFilters(filterProvider);
+        return mappingJacksonValue;
+    }
+
+    @GetMapping("/customer/order/{orderId}")
+    public MappingJacksonValue retrieveOrderById(Principal principal, @PathVariable Long orderId) {
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.getOrderById(principal.getName(), orderId));
+        SimpleFilterProvider filterProvider = new SimpleFilterProvider();
+        SimpleBeanPropertyFilter orderFilter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "createdDate", "amountPaid", "orderProducts", "productVariation");
+        filterProvider.addFilter("orderFilter", orderFilter);
+        mappingJacksonValue.setFilters(filterProvider);
+        return mappingJacksonValue;
+    }
 }

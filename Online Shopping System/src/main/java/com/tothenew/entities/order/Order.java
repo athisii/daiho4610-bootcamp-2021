@@ -1,5 +1,6 @@
 package com.tothenew.entities.order;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.tothenew.entities.user.Customer;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -15,6 +16,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonFilter("orderFilter")
 @Table(name = "`order`")
 @EntityListeners(AuditingEntityListener.class)
 public class Order {
@@ -24,7 +26,11 @@ public class Order {
     private double amountPaid;
     @CreatedDate
     private Date createdDate;
-    private PaymentMethod paymentMethod = PaymentMethod.CARD;
+
+    @Enumerated
+    @Column(columnDefinition = "smallint")
+    private PaymentMethod paymentMethod = PaymentMethod.CARD; //default
+
     private String customerAddressCity;
     private String customerAddressState;
     private String customerAddressCountry;

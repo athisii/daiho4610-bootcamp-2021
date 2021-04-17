@@ -1,16 +1,16 @@
 package com.tothenew.services.user;
 
+import com.tothenew.entities.order.Order;
 import com.tothenew.entities.product.*;
 import com.tothenew.entities.user.Customer;
 import com.tothenew.entities.user.Seller;
-import com.tothenew.exception.CategoryExistException;
-import com.tothenew.exception.CategoryMetadataFieldException;
-import com.tothenew.exception.ProductExistException;
+import com.tothenew.exception.*;
 import com.tothenew.objects.CategoryMetadataFieldDto;
 import com.tothenew.objects.CreateCategoryDto;
 import com.tothenew.objects.UpdateCategoryDto;
 import com.tothenew.objects.categorymetadata.CategoryMetadataFieldValuesDto;
 import com.tothenew.objects.categorymetadata.MetadataFieldIdValue;
+import com.tothenew.repos.order.OrderRepository;
 import com.tothenew.repos.product.*;
 import com.tothenew.repos.user.CustomerRepository;
 import com.tothenew.repos.user.SellerRepository;
@@ -45,6 +45,8 @@ public class AdminService {
     private ProductRepository productRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private OrderRepository orderRepository;
 
 
     public Page<Customer> getAllCustomers(Pageable pageable) {
@@ -58,7 +60,7 @@ public class AdminService {
 
     public Long addMetadataField(CategoryMetadataFieldDto cmfd) {
         if (checkIfMetadataFieldNameExists(cmfd.getName())) {
-            throw new CategoryMetadataFieldException("Metadata Field Name Already Added.");
+            throw new CategoryMetadataFieldExistException("Metadata Field Name Already Added.");
         }
         CategoryMetadataField cmf = new CategoryMetadataField(cmfd.getName());
         categoryMetadataFieldRepository.save(cmf);
@@ -89,7 +91,7 @@ public class AdminService {
             categoryRepository.save(category);
             parentCategoryRepository.save(parentCategory);
         }, () -> {
-            throw new CategoryExistException("No ParentCategory found for id: " + categoryDto.getCategoryParentId());
+            throw new GenericNotFoundException("No ParentCategory found for id: " + categoryDto.getCategoryParentId());
         });
         return category.getId();
 
@@ -105,7 +107,7 @@ public class AdminService {
 
     public List<Category> getCategoryById(Long categoryId) {
         Optional<ParentCategory> categoryOptional = parentCategoryRepository.findById(categoryId);
-        categoryOptional.orElseThrow(() -> new CategoryExistException("Not found for category with id: " + categoryId));
+        categoryOptional.orElseThrow(() -> new GenericNotFoundException("Not found for category with id: " + categoryId));
         return categoryOptional.get().getCategories();
     }
 
@@ -118,7 +120,7 @@ public class AdminService {
             category.setName(updateCategoryDto.getName());
             categoryRepository.save(category);
         }, () -> {
-            throw new CategoryExistException("Not found for category with id: " + updateCategoryDto.getId());
+            throw new GenericNotFoundException("Not found for category with id: " + updateCategoryDto.getId());
         });
     }
 
@@ -129,10 +131,10 @@ public class AdminService {
             LinkedHashSet<MetadataFieldIdValue> mfIdvs = cmfvd.getMetadataFieldIdValues();
             mfIdvs.forEach(mfIdv -> {
                 if (checkIfMetadataFieldIdIsEmpty(mfIdv.getMetadataFieldId())) {
-                    throw new CategoryMetadataFieldException("Not found Category Metadata Field with id: " + mfIdv.getMetadataFieldId());
+                    throw new GenericNotFoundException("Not found Category Metadata Field with id: " + mfIdv.getMetadataFieldId());
                 }
                 if (checkIfCategoryMetadataFieldKeyExists(cmfvd.getCategoryId(), mfIdv.getMetadataFieldId())) {
-                    throw new CategoryMetadataFieldException("Same CategoryMetadataFieldKey Already Exists");
+                    throw new CategoryMetadataFieldExistException("Same CategoryMetadataFieldKey Already Exists");
                 }
             });
             Category category = categoryRepository.findById(categoryId).get();
@@ -151,7 +153,7 @@ public class AdminService {
             return;
 
         }
-        throw new CategoryExistException("Not Found for category with id: " + categoryId);
+        throw new GenericNotFoundException("Not Found for category with id: " + categoryId);
 
 
     }
@@ -174,7 +176,7 @@ public class AdminService {
         LinkedHashSet<MetadataFieldIdValue> mfIdVs = cmfvd.getMetadataFieldIdValues();
         mfIdVs.forEach(mfIdv -> {
             if (!checkIfCategoryMetadataFieldKeyExists(cmfvd.getCategoryId(), mfIdv.getMetadataFieldId())) {
-                throw new CategoryMetadataFieldException("Not found for Category Id: " + categoryId + " associated with MetadataField Id: " + mfIdv.getMetadataFieldId());
+                throw new GenericNotFoundException("Not found for Category Id: " + categoryId + " associated with MetadataField Id: " + mfIdv.getMetadataFieldId());
             }
         });
         List<CategoryMetadataFieldValues> cmfvs = new ArrayList<>();
@@ -189,10 +191,10 @@ public class AdminService {
 
     public void activateProduct(Long productId) {
         Optional<Product> productOptional = productRepository.findById(productId);
-        productOptional.orElseThrow(() -> new ProductExistException("Not found for product with id: " + productId));
+        productOptional.orElseThrow(() -> new GenericNotFoundException("Not found for product with id: " + productId));
         productOptional.ifPresent(product -> {
             if (product.isActive()) {
-                throw new ProductExistException("Product already activated");
+                throw new ProductActivationException("Product already activated");
             }
             product.setActive(true);
             productRepository.save(product);
@@ -203,10 +205,10 @@ public class AdminService {
 
     public void deactivateProduct(Long productId) {
         Optional<Product> productOptional = productRepository.findById(productId);
-        productOptional.orElseThrow(() -> new ProductExistException("Not found for product with id: " + productId));
+        productOptional.orElseThrow(() -> new GenericNotFoundException("Not found for product with id: " + productId));
         productOptional.ifPresent(product -> {
             if (!product.isActive()) {
-                throw new ProductExistException("Product already deactivated");
+                throw new ProductActivationException("Product already deactivated");
             }
             product.setActive(false);
             productRepository.save(product);
@@ -216,11 +218,15 @@ public class AdminService {
 
     public Product getProductById(Long productId) {
         Optional<Product> productOptional = productRepository.findById(productId);
-        productOptional.orElseThrow(() -> new ProductExistException("Not found for product with id: " + productId));
+        productOptional.orElseThrow(() -> new GenericNotFoundException("Not found for product with id: " + productId));
         return productOptional.get();
     }
 
     public Page<Product> getAllProducts(Pageable pageable) {
         return productRepository.findAll(pageable);
+    }
+
+    public Page<Order> getAllOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable);
     }
 }

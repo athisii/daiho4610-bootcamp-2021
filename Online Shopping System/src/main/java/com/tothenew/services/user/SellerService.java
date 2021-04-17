@@ -77,7 +77,7 @@ public class SellerService {
         userService.sendActivationMessage(newSeller, UserRole.SELLER);
     }
 
-    public void resendToken(EmailDto emailDto) throws UserNotFoundException {
+    public void resendToken(EmailDto emailDto) throws GenericNotFoundException {
         User user = userService.findUserByEmail(emailDto.getEmail());
         if (user.isActive()) {
             userService.sendResetPasswordMessage(user);
@@ -112,7 +112,7 @@ public class SellerService {
     public void addProduct(CreateProductDto createProductDto, String email) {
         Long categoryId = createProductDto.getCategory();
         Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
-        categoryOptional.orElseThrow(() -> new CategoryExistException("No category found for id:" + categoryId));
+        categoryOptional.orElseThrow(() -> new GenericNotFoundException("No category found for id:" + categoryId));
         Category category = categoryOptional.get();
         String productName = createProductDto.getName();
         String brand = createProductDto.getBrand();
@@ -143,25 +143,25 @@ public class SellerService {
     public Product getProductById(String email, Long productId) {
         Seller seller = (Seller) userService.findUserByEmail(email);
         Optional<Product> productOptional = productRepository.findById(productId);
-        productOptional.orElseThrow(() -> new ProductExistException("No product found for id: " + productId));
+        productOptional.orElseThrow(() -> new GenericNotFoundException("No product found for id: " + productId));
         Product product = productOptional.get();
         if (product.getSeller().getId().equals(seller.getId())) {
             return product;
         }
-        throw new ProductExistException("No product found for id: " + productId);
+        throw new ProductActivationException("No product found for id: " + productId);
     }
 
     public void deleteProduct(String email, Long productId) {
         Seller seller = (Seller) userService.findUserByEmail(email);
         Optional<Product> productOptional = productRepository.findById(productId);
-        productOptional.orElseThrow(() -> new ProductExistException("No product found for id: " + productId));
+        productOptional.orElseThrow(() -> new GenericNotFoundException("No product found for id: " + productId));
         Product product = productOptional.get();
         if (product.getSeller().getId().equals(seller.getId())) {
             product.setDeleted(true);
             productRepository.save(product);
             return;
         }
-        throw new ProductExistException("No product found for id: " + productId);
+        throw new GenericNotFoundException("No product found for id: " + productId);
 
     }
 
@@ -171,7 +171,7 @@ public class SellerService {
         Long productId = updateProductDto.getProductId();
 
         Optional<Product> productOptional = productRepository.findById(productId);
-        productOptional.orElseThrow(() -> new ProductExistException("No product found for id: " + productId));
+        productOptional.orElseThrow(() -> new GenericNotFoundException("No product found for id: " + productId));
         Product product = productOptional.get();
         if (product.getSeller().getId().equals(seller.getId())) {
             String oldName = product.getName();
@@ -193,41 +193,41 @@ public class SellerService {
             product.setName(oldName);
             productRepository.save(product);
         }
-        throw new ProductExistException("No product found for id: " + productId);
+        throw new GenericNotFoundException("No product found for id: " + productId);
 
     }
 
     public ProductVariation getProductVariationById(String email, Long productVariationId) {
         Seller seller = (Seller) userService.findUserByEmail(email);
         Optional<ProductVariation> pvOptional = productVariationRepository.findById(productVariationId);
-        pvOptional.orElseThrow(() -> new ProductExistException("No product variation found for id: " + productVariationId));
+        pvOptional.orElseThrow(() -> new GenericNotFoundException("No product variation found for id: " + productVariationId));
         ProductVariation productVariation = pvOptional.get();
         if (productVariation.getProduct().getSeller().getId().equals(seller.getId()) && !productVariation.getProduct().isDeleted()) {
             return productVariation;
         }
-        throw new ProductExistException("No product variation found for id: " + productVariationId);
+        throw new GenericNotFoundException("No product variation found for id: " + productVariationId);
     }
 
     public Page<ProductVariation> getAllProductVariationForProductById(Pageable pageable, String email, Long productId) {
         Seller seller = (Seller) userService.findUserByEmail(email);
         Optional<Product> productOptional = productRepository.findById(productId);
-        productOptional.orElseThrow(() -> new ProductExistException("No product found for id: " + productId));
+        productOptional.orElseThrow(() -> new GenericNotFoundException("No product found for id: " + productId));
         Product product = productOptional.get();
         if (product.getSeller().getId().equals(seller.getId()) && !product.isDeleted()) {
             return productVariationRepository.findByProductId(product.getId(), pageable);
         }
-        throw new ProductExistException("No product found for id: " + productId);
+        throw new GenericNotFoundException("No product found for id: " + productId);
     }
 
     public void addProductVariation(CreateProductVariationDto createProductVariationDto, String email) {
         Long productId = createProductVariationDto.getProductId();
         Seller seller = (Seller) userService.findUserByEmail(email);
         Optional<Product> productOptional = productRepository.findById(productId);
-        productOptional.orElseThrow(() -> new ProductExistException("No product found for id: " + productId));
+        productOptional.orElseThrow(() -> new GenericNotFoundException("No product found for id: " + productId));
         Product product = productOptional.get();
 
         if (!product.getSeller().getId().equals(seller.getId()) || !product.isActive() || product.isDeleted()) {
-            throw new ProductExistException("No product found for id: " + productId);
+            throw new GenericNotFoundException("No product found for id: " + productId);
         }
         Category category = product.getCategory();
         List<ProductVariationMetadataFieldValueDto> metadataFieldIdValues = createProductVariationDto.getMetadata();
@@ -248,12 +248,12 @@ public class SellerService {
         Long productVariationId = updateProductVariationDto.getProductVariationId();
         Seller seller = (Seller) userService.findUserByEmail(email);
         Optional<ProductVariation> productVariationOptional = productVariationRepository.findById(productVariationId);
-        productVariationOptional.orElseThrow(() -> new ProductExistException("No product variation found for id: " + productVariationId));
+        productVariationOptional.orElseThrow(() -> new GenericNotFoundException("No product variation found for id: " + productVariationId));
         ProductVariation productVariation = productVariationOptional.get();
         Product product = productVariation.getProduct();
 
         if (!product.getSeller().getId().equals(seller.getId()) || !product.isActive() || product.isDeleted()) {
-            throw new ProductExistException("No product variation found for id: " + productVariationId);
+            throw new GenericNotFoundException("No product found for id: " + product.getId());
         }
 
         Category category = product.getCategory();
@@ -275,7 +275,7 @@ public class SellerService {
         for (ProductVariationMetadataFieldValueDto mv : metadataFieldIdValues) {
             Long metadataFieldId = mv.getMetadataFieldId();
             if (!categoryMFIds.contains(metadataFieldId)) {
-                throw new CategoryMetadataFieldException("Category Metadata Field not found with id: " + metadataFieldId);
+                throw new GenericNotFoundException("Category Metadata Field not found with id: " + metadataFieldId);
             }
             CategoryMetadataFieldValues cMFV = categoryMetadataFieldValues.stream()
                     .filter(cmfv -> cmfv.getCategory().getId().equals(categoryId) && cmfv.getCategoryMetadataField().getId().equals(metadataFieldId))
@@ -283,7 +283,7 @@ public class SellerService {
             String requestValue = mv.getValue();
             Optional<String> result = Arrays.stream(cMFV.getValue().split(",")).filter(value -> value.equals(requestValue)).findFirst();
             if (result.isEmpty()) {
-                throw new CategoryMetadataFieldException("Metadata Field Value should be within the possible values! Given value: " + requestValue);
+                throw new CategoryMetadataFieldValueException("Metadata Field Value should be within the possible values! Given value: " + requestValue);
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.tothenew.entities.order;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.tothenew.entities.product.ProductVariation;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.List;
         name = "json",
         typeClass = JsonStringType.class
 )
+@JsonFilter("orderProductFilter")
 public class OrderProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,7 +43,7 @@ public class OrderProduct {
     @JoinColumn(name = "product_variation_id")
     private ProductVariation productVariation;
 
-    @OneToOne(mappedBy = "orderProduct")
+    @OneToOne(mappedBy = "orderProduct", cascade = CascadeType.ALL)
     private OrderStatus orderStatus;
 
 }

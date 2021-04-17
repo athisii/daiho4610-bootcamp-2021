@@ -14,7 +14,13 @@ import javax.persistence.*;
 public class OrderStatus {
     @Id
     private Long id;
+
+    @Enumerated
+    @Column(columnDefinition = "smallint")
     private FromStatus fromStatus;
+
+    @Enumerated
+    @Column(columnDefinition = "smallint")
     private ToStatus toStatus;
     private String transitionNotesComments;
 

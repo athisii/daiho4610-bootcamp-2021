@@ -7,7 +7,7 @@ import com.tothenew.entities.user.Address;
 import com.tothenew.entities.user.Role;
 import com.tothenew.entities.user.User;
 import com.tothenew.entities.user.UserRole;
-import com.tothenew.exception.AddressNotFoundException;
+import com.tothenew.exception.GenericNotFoundException;
 import com.tothenew.exception.InvalidTokenException;
 import com.tothenew.exception.UserActivationException;
 import com.tothenew.exception.UserNotFoundException;
@@ -205,7 +205,7 @@ public class UserService {
 
     public void activateUserById(Long userId) {
         Optional<User> userOptional = userRepository.findById(userId);
-        userOptional.orElseThrow(() -> new UserNotFoundException("No user found for id: " + userId));
+        userOptional.orElseThrow(() -> new GenericNotFoundException("No user found for id: " + userId));
         userOptional.ifPresent(user -> {
             if (user.isActive()) {
                 throw new UserActivationException("User already activated");
@@ -219,7 +219,7 @@ public class UserService {
 
     public void deactivateUserById(Long userId) {
         Optional<User> userOptional = userRepository.findById(userId);
-        userOptional.orElseThrow(() -> new UserNotFoundException("No user found for id: " + userId));
+        userOptional.orElseThrow(() -> new GenericNotFoundException("No user found for id: " + userId));
         userOptional.ifPresent(user -> {
             if (!user.isActive()) {
                 throw new UserActivationException("User already deactivated");
@@ -268,7 +268,7 @@ public class UserService {
 
     public void updateAddress(AddressDto addressDto, Long addressId) {
         Optional<Address> addressOptional = addressRepository.findById(addressId);
-        addressOptional.orElseThrow(() -> new AddressNotFoundException("Address not found for id: " + addressId));
+        addressOptional.orElseThrow(() -> new GenericNotFoundException("Address not found for id: " + addressId));
         addressOptional.ifPresent(address -> {
             ModelMapper mm = new ModelMapper();
             mm.map(addressDto, address);
@@ -279,7 +279,7 @@ public class UserService {
     public Page<Category> getAllCategories(Pageable pageable) {
         return categoryRepository.findAll(pageable);
     }
-    
+
 
     public void sendProductActivationMessage(Product product) {
 
