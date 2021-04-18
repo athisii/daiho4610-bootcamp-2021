@@ -14,8 +14,10 @@ public class FromStatus {
     @Column(columnDefinition = "smallint")
     private int id;
     private String name;
+    private int value;
 
-    public FromStatus(String name) {
+    public FromStatus(String name, int value) {
         this.name = name;
+        this.value = value;
     }
 }

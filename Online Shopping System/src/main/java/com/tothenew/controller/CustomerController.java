@@ -226,6 +226,20 @@ public class CustomerController {
         return new ResponseEntity<>(new SuccessResponse("Something is wrong in your request parameter"), HttpStatus.NOT_FOUND);
     }
 
+    @PatchMapping("/customer/order/cancel")
+    public ResponseEntity<?> cancelOrder(@RequestParam Long orderProductId, Principal principal) {
+        customerService.cancelOrder(orderProductId, principal.getName());
+        return new ResponseEntity<>(new SuccessResponse("Order cancelled successfully"), HttpStatus.OK);
+
+    }
+
+    @PatchMapping("/customer/order/return")
+    public ResponseEntity<?> returnOrder(@RequestParam Long orderProductId, Principal principal) {
+        customerService.returnOrder(orderProductId, principal.getName());
+        return new ResponseEntity<>(new SuccessResponse("Order cancelled successfully"), HttpStatus.OK);
+
+    }
+
     @GetMapping("/customer/order")
     public MappingJacksonValue retrieveAllOrders(@PageableDefault(sort = "id") Pageable pageable, Principal principal) {
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.getAllOrders(principal.getName(), pageable));
@@ -240,7 +254,7 @@ public class CustomerController {
     public MappingJacksonValue retrieveOrderById(Principal principal, @PathVariable Long orderId) {
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(customerService.getOrderById(principal.getName(), orderId));
         SimpleFilterProvider filterProvider = new SimpleFilterProvider();
-        SimpleBeanPropertyFilter orderFilter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "createdDate", "amountPaid", "orderProducts", "productVariation");
+        SimpleBeanPropertyFilter orderFilter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "createdDate", "amountPaid");
         filterProvider.addFilter("orderFilter", orderFilter);
         mappingJacksonValue.setFilters(filterProvider);
         return mappingJacksonValue;

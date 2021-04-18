@@ -3,6 +3,9 @@ package com.tothenew.controller;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.tothenew.entities.order.Order;
+import com.tothenew.entities.order.orderstatusenum.FromStatus;
+import com.tothenew.entities.order.orderstatusenum.ToStatus;
 import com.tothenew.objects.*;
 import com.tothenew.objects.product.CreateProductDto;
 import com.tothenew.objects.product.CreateProductVariationDto;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 
 
 @RestController
@@ -98,6 +102,15 @@ public class SellerController {
         return new ResponseEntity<>(new SuccessResponse("Product deleted successfully!"), HttpStatus.OK);
     }
 
+    @PatchMapping("/seller/order-status")
+    public ResponseEntity<?> updateOrderProductStatus(@RequestParam("orderProductId") Long orderProductId,
+                                                      @RequestParam("fromStatus") FromStatus fromStatus,
+                                                      @RequestParam(value = "toStatus", required = false) ToStatus toStatus,
+                                                      Principal principal) {
+        sellerService.updateOrderProductStatus(principal.getName(), orderProductId, fromStatus, toStatus);
+        return new ResponseEntity<>(new SuccessResponse("Changed order product status successfully!"), HttpStatus.OK);
+    }
+
 
     private MappingJacksonValue addFilter(MappingJacksonValue mappingJacksonValue) {
         SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept("id", "name", "brand", "active", "returnable", "description", "cancelable", "category");
@@ -143,4 +156,16 @@ public class SellerController {
         mappingJacksonValue.setFilters(categoryFilter);
         return mappingJacksonValue;
     }
+
+    @GetMapping("/seller/order")
+    public MappingJacksonValue retrieveAllOrder(Principal principal) {
+        List<Order> orders = sellerService.getAllOrder(principal.getName());
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(orders);
+        SimpleFilterProvider filter = new SimpleFilterProvider();
+        filter.addFilter("orderFilter", SimpleBeanPropertyFilter.filterOutAllExcept("id", "createdDate", "amountPaid", "paymentMethod"));
+        mappingJacksonValue.setFilters(filter);
+        return mappingJacksonValue;
+    }
+
+
 }

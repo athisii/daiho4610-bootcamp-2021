@@ -67,12 +67,20 @@ public class Bootstrap implements ApplicationRunner {
 
             var fromStatusValues = com.tothenew.entities.order.orderstatusenum.FromStatus.values();
             List<FromStatus> fromStatuses = new ArrayList<>();
-            Arrays.stream(fromStatusValues).forEach(value -> fromStatuses.add(new FromStatus(value.name())));
+            AtomicInteger val = new AtomicInteger(0);
+            Arrays.stream(fromStatusValues).forEach(value -> {
+                fromStatuses.add(new FromStatus(value.name(), val.get()));
+                val.getAndIncrement();
+            });
             fromStatusRepository.saveAll(fromStatuses);
 
             var toStatusValues = com.tothenew.entities.order.orderstatusenum.ToStatus.values();
             List<ToStatus> toStatuses = new ArrayList<>();
-            Arrays.stream(toStatusValues).forEach(value -> toStatuses.add(new ToStatus(value.name())));
+            AtomicInteger val2 = new AtomicInteger(0);
+            Arrays.stream(toStatusValues).forEach(value -> {
+                toStatuses.add(new ToStatus(value.name(), val2.get()));
+                val2.getAndIncrement();
+            });
             toStatusRepository.saveAll(toStatuses);
 
 

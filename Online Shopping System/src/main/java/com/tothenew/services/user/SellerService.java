@@ -1,5 +1,10 @@
 package com.tothenew.services.user;
 
+import com.tothenew.entities.order.Order;
+import com.tothenew.entities.order.OrderProduct;
+import com.tothenew.entities.order.OrderStatus;
+import com.tothenew.entities.order.orderstatusenum.FromStatus;
+import com.tothenew.entities.order.orderstatusenum.ToStatus;
 import com.tothenew.entities.product.*;
 import com.tothenew.entities.user.Role;
 import com.tothenew.entities.user.Seller;
@@ -8,24 +13,25 @@ import com.tothenew.entities.user.UserRole;
 import com.tothenew.exception.*;
 import com.tothenew.objects.*;
 import com.tothenew.objects.product.*;
+import com.tothenew.repos.order.OrderProductRepository;
+import com.tothenew.repos.order.OrderStatusRepository;
 import com.tothenew.repos.product.CategoryMetadataFieldRepository;
 import com.tothenew.repos.product.CategoryRepository;
 import com.tothenew.repos.product.ProductRepository;
 import com.tothenew.repos.product.ProductVariationRepository;
 import com.tothenew.repos.user.SellerRepository;
 import com.tothenew.repos.user.UserRepository;
+import com.tothenew.status.OrderStatusMap;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -55,6 +61,12 @@ public class SellerService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private OrderStatusMap orderStatusMap;
+    @Autowired
+    private OrderProductRepository orderProductRepository;
+    @Autowired
+    private OrderStatusRepository orderStatusRepository;
 
     public void registerNewSeller(SellerDto sellerDto)
             throws UserAlreadyExistException {
@@ -126,7 +138,7 @@ public class SellerService {
         product.setSeller(seller);
         product.setCategory(category);
         productRepository.save(product);
-//        userService.sendProductActivationMessage(product);
+        userService.sendProductActivationMessage(product);
     }
 
 
@@ -300,5 +312,58 @@ public class SellerService {
         }
         sb.setCharAt(sb.length() - 1, '}');
         return sb.toString();
+    }
+
+    public List<Order> getAllOrder(String email) {
+        Seller seller = (Seller) userService.findUserByEmail(email);
+        return seller.getProducts()
+                .stream()
+                .map(Product::getProductVariations)
+                .flatMap(Collection::stream)
+                .map(ProductVariation::getOrderProducts)
+                .flatMap(Collection::stream)
+                .map(OrderProduct::getOrder)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    public void updateOrderProductStatus(String email, Long orderProductId, FromStatus fromStatusNew, ToStatus toStatusNew) {
+        Seller seller = (Seller) userService.findUserByEmail(email);
+        Optional<OrderProduct> orderProductOptional = orderProductRepository.findById(orderProductId);
+        orderProductOptional.orElseThrow(() -> new GenericNotFoundException("No order product found with id: " + orderProductId));
+        OrderProduct orderProduct = orderProductOptional.get();
+        if (!orderProduct.getProductVariation().getProduct().getSeller().getId().equals(seller.getId())) {
+            throw new GenericNotFoundException("No order product found with id: " + orderProductId);
+        }
+        OrderStatus orderStatus = orderProduct.getOrderStatus();
+        ToStatus toStatusOld = orderStatus.getToStatus();
+        if (fromStatusNew != null && toStatusNew != null) {
+            Map<FromStatus, List<ToStatus>> statusMap = orderStatusMap.getStatusList();
+            if (fromStatusNew.equals(FromStatus.ORDER_PLACED)) {
+                List<ToStatus> toStatusExpectedValues = statusMap.get(fromStatusNew);
+                if (toStatusExpectedValues.contains(toStatusNew)) {
+                    orderStatus.setFromStatus(fromStatusNew);
+                    orderStatus.setToStatus(toStatusNew);
+                    orderStatus.setTransitionNotesComments("From " + fromStatusNew.name() + " To " + toStatusNew.name());
+                    orderStatusRepository.save(orderStatus);
+                    return;
+                }
+                throw new OrderStatusException("ToStatus value is not in range or is null.");
+            }
+            if (toStatusOld != null) {
+                List<ToStatus> toStatusValues = statusMap.get(fromStatusNew);
+                if (toStatusOld.name().equals(fromStatusNew.name()) && toStatusValues.contains(toStatusNew)) {
+                    orderStatus.setFromStatus(fromStatusNew);
+                    orderStatus.setToStatus(toStatusNew);
+                    orderStatus.setTransitionNotesComments("From " + fromStatusNew.name() + " To " + toStatusNew.name());
+                    orderStatusRepository.save(orderStatus);
+                    return;
+                }
+                throw new OrderStatusException("Either FromStatus or ToStatus value is not in range.");
+            }
+            throw new OrderStatusException("Status transition does not exist.");
+
+        }
+        throw new OrderStatusException("FromStatus or ToStatus should not is not be null.");
     }
 }

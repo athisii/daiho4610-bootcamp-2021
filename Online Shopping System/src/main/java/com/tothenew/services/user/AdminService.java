@@ -1,6 +1,10 @@
 package com.tothenew.services.user;
 
 import com.tothenew.entities.order.Order;
+import com.tothenew.entities.order.OrderProduct;
+import com.tothenew.entities.order.OrderStatus;
+import com.tothenew.entities.order.orderstatusenum.FromStatus;
+import com.tothenew.entities.order.orderstatusenum.ToStatus;
 import com.tothenew.entities.product.*;
 import com.tothenew.entities.user.Customer;
 import com.tothenew.entities.user.Seller;
@@ -10,20 +14,20 @@ import com.tothenew.objects.CreateCategoryDto;
 import com.tothenew.objects.UpdateCategoryDto;
 import com.tothenew.objects.categorymetadata.CategoryMetadataFieldValuesDto;
 import com.tothenew.objects.categorymetadata.MetadataFieldIdValue;
+import com.tothenew.repos.order.OrderProductRepository;
 import com.tothenew.repos.order.OrderRepository;
+import com.tothenew.repos.order.OrderStatusRepository;
 import com.tothenew.repos.product.*;
 import com.tothenew.repos.user.CustomerRepository;
 import com.tothenew.repos.user.SellerRepository;
+import com.tothenew.status.OrderStatusMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Transactional
 @Service
@@ -47,6 +51,13 @@ public class AdminService {
     private UserService userService;
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderStatusMap orderStatusMap;
+    @Autowired
+    private OrderProductRepository orderProductRepository;
+    @Autowired
+    private OrderStatusRepository orderStatusRepository;
 
 
     public Page<Customer> getAllCustomers(Pageable pageable) {
@@ -228,5 +239,42 @@ public class AdminService {
 
     public Page<Order> getAllOrders(Pageable pageable) {
         return orderRepository.findAll(pageable);
+    }
+
+
+    public void updateOrderProductStatus(Long orderProductId, FromStatus fromStatusNew, ToStatus toStatusNew) {
+        Optional<OrderProduct> orderProductOptional = orderProductRepository.findById(orderProductId);
+        orderProductOptional.orElseThrow(() -> new GenericNotFoundException("No order product found with id: " + orderProductId));
+        OrderProduct orderProduct = orderProductOptional.get();
+        OrderStatus orderStatus = orderProduct.getOrderStatus();
+        ToStatus toStatusOld = orderStatus.getToStatus();
+        if (fromStatusNew != null && toStatusNew != null) {
+            Map<FromStatus, List<ToStatus>> statusMap = orderStatusMap.getStatusList();
+            if (fromStatusNew.equals(FromStatus.ORDER_PLACED)) {
+                List<ToStatus> toStatusExpectedValues = statusMap.get(fromStatusNew);
+                if (toStatusExpectedValues.contains(toStatusNew)) {
+                    orderStatus.setFromStatus(fromStatusNew);
+                    orderStatus.setToStatus(toStatusNew);
+                    orderStatus.setTransitionNotesComments("From " + fromStatusNew.name() + " To " + toStatusNew.name());
+                    orderStatusRepository.save(orderStatus);
+                    return;
+                }
+                throw new OrderStatusException("ToStatus value is not in range or is null.");
+            }
+            if (toStatusOld != null) {
+                List<ToStatus> toStatusValues = statusMap.get(fromStatusNew);
+                if (toStatusOld.name().equals(fromStatusNew.name()) && toStatusValues.contains(toStatusNew)) {
+                    orderStatus.setFromStatus(fromStatusNew);
+                    orderStatus.setToStatus(toStatusNew);
+                    orderStatus.setTransitionNotesComments("From " + fromStatusNew.name() + " To " + toStatusNew.name());
+                    orderStatusRepository.save(orderStatus);
+                    return;
+                }
+                throw new OrderStatusException("Either FromStatus or ToStatus value is not in range.");
+            }
+            throw new OrderStatusException("Status transition does not exist.");
+
+        }
+        throw new OrderStatusException("FromStatus or ToStatus should not is not be null.");
     }
 }

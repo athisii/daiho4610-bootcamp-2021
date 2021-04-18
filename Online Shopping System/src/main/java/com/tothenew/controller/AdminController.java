@@ -3,6 +3,8 @@ package com.tothenew.controller;
 
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.tothenew.entities.order.orderstatusenum.FromStatus;
+import com.tothenew.entities.order.orderstatusenum.ToStatus;
 import com.tothenew.entities.product.CategoryMetadataField;
 import com.tothenew.objects.CategoryMetadataFieldDto;
 import com.tothenew.objects.CreateCategoryDto;
@@ -21,6 +23,7 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @RequestMapping("/admin")
 @RestController
@@ -162,4 +165,14 @@ public class AdminController {
         mappingJacksonValue.setFilters(filterProvider);
         return mappingJacksonValue;
     }
+
+    @PatchMapping("/order-status")
+    public ResponseEntity<?> updateOrderProductStatus(@RequestParam("orderProductId") Long orderProductId,
+                                                      @RequestParam("fromStatus") FromStatus fromStatus,
+                                                      @RequestParam(value = "toStatus", required = false) ToStatus toStatus) {
+        adminService.updateOrderProductStatus(orderProductId, fromStatus, toStatus);
+        return new ResponseEntity<>(new SuccessResponse("Changed order product status successfully!"), HttpStatus.OK);
+    }
+
+
 }

@@ -92,6 +92,13 @@ class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHa
         return new ResponseEntity<>(exceptionResponse, HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(OrderStatusException.class)
+    public final ResponseEntity<Object> handleOrderStatusException(OrderStatusException ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(), null);
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
     @ExceptionHandler(RequestBodyException.class)
     public final ResponseEntity<Object> handleRequestBodyException(RequestBodyException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(), null);

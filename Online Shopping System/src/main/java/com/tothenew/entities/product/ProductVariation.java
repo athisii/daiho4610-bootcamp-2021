@@ -1,6 +1,7 @@
 package com.tothenew.entities.product;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.tothenew.entities.order.OrderProduct;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,6 +15,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
@@ -48,15 +50,15 @@ public class ProductVariation {
     @Column(columnDefinition = "json")
     private String metadata;
 
-
+    @OneToMany(mappedBy = "productVariation")
+    private List<OrderProduct> orderProducts;
 //    @OneToOne
 //    @JoinColumn(name = "metadata")
 //    private Category category;
 
-//    @OneToMany(mappedBy = "productVariation", cascade = CascadeType.ALL)
+    //    @OneToMany(mappedBy = "productVariation", cascade = CascadeType.ALL)
 //    private List<Cart> carts = new ArrayList<>();
 //
-//    @OneToOne(mappedBy = "productVariation")
-//    private OrderProduct orderProduct;
+
 
 }

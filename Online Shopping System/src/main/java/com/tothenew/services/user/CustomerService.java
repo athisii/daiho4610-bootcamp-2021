@@ -5,6 +5,7 @@ import com.tothenew.entities.order.Order;
 import com.tothenew.entities.order.OrderProduct;
 import com.tothenew.entities.order.OrderStatus;
 import com.tothenew.entities.order.orderstatusenum.FromStatus;
+import com.tothenew.entities.order.orderstatusenum.ToStatus;
 import com.tothenew.entities.product.Category;
 import com.tothenew.entities.product.ParentCategory;
 import com.tothenew.entities.product.Product;
@@ -15,7 +16,9 @@ import com.tothenew.exception.*;
 import com.tothenew.objects.*;
 import com.tothenew.repos.AddressRepository;
 import com.tothenew.repos.VerificationTokenRepository;
+import com.tothenew.repos.order.OrderProductRepository;
 import com.tothenew.repos.order.OrderRepository;
+import com.tothenew.repos.order.OrderStatusRepository;
 import com.tothenew.repos.product.*;
 import com.tothenew.repos.user.CustomerRepository;
 import com.tothenew.repos.user.UserRepository;
@@ -26,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.From;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,6 +65,10 @@ public class CustomerService {
     private CartRepository cartRepository;
     @Autowired
     private OrderRepository orderRepository;
+    @Autowired
+    private OrderProductRepository orderProductRepository;
+    @Autowired
+    private OrderStatusRepository orderStatusRepository;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -386,6 +394,7 @@ public class CustomerService {
 
         OrderStatus orderStatus = new OrderStatus();
         orderStatus.setFromStatus(FromStatus.ORDER_PLACED);
+        orderStatus.setTransitionNotesComments("Order placed");
         orderStatus.setOrderProduct(orderProduct); //Set Order Product
 
         orderProduct.setOrderStatus(orderStatus);  //Set Order Status to take cascading effect when creating.
@@ -419,6 +428,43 @@ public class CustomerService {
             throw new GenericNotFoundException("No order found with id: " + orderId);
         }
         return order;
+    }
+
+    public void cancelOrder(Long orderProductId, String email) {
+        OrderStatus orderStatus = getOrderStatus(orderProductId, email);
+        FromStatus fromStatus = orderStatus.getFromStatus();
+        if (fromStatus == FromStatus.ORDER_PLACED) {
+            orderStatus.setToStatus(ToStatus.CANCELLED);
+            orderStatus.setTransitionNotesComments("Order has been cancelled");
+            orderStatusRepository.save(orderStatus);
+            return;
+        }
+        throw new OrderStatusException("You cannot cancel the order now.");
+
+    }
+
+    public void returnOrder(Long orderProductId, String email) {
+        OrderStatus orderStatus = getOrderStatus(orderProductId, email);
+        FromStatus fromStatus = orderStatus.getFromStatus();
+        if (fromStatus == FromStatus.DELIVERED) {
+            orderStatus.setToStatus(ToStatus.RETURN_REQUESTED);
+            orderStatus.setTransitionNotesComments("Request for return of ordered product.");
+            orderStatusRepository.save(orderStatus);
+            return;
+        }
+        throw new OrderStatusException("You cannot return the order now.");
+
+    }
+
+    private OrderStatus getOrderStatus(Long orderProductId, String email) {
+        Customer customer = (Customer) userService.findUserByEmail(email);
+        Optional<OrderProduct> orderProductOptional = orderProductRepository.findById(orderProductId);
+        orderProductOptional.orElseThrow(() -> new GenericNotFoundException("No Order Product found with id: " + orderProductId));
+        OrderProduct orderProduct = orderProductOptional.get();
+        if (!orderProduct.getOrder().getCustomer().getId().equals(customer.getId())) {
+            throw new GenericNotFoundException("No Order Product found with id: " + orderProductId);
+        }
+        return orderProduct.getOrderStatus();
     }
 }
 
